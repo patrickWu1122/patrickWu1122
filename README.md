@@ -13,3 +13,6 @@
 - `index.html` 主程式（偵測、建議規則、訓練參數 THR / ANG）
 - `sw.js` 離線快取
 - `manifest.webmanifest`、`icon-*.png` 安裝資訊與圖示
+
+## 範例照片授權
+`comp/` 內的構圖範例照片來自 [slay composition guides](https://github.com/slaycamera/composition-guides)（作者 slay — slaycamera.com），以 CC BY 4.0 授權使用，已裁成 3:4。其餘構圖示意圖為本 App 自繪。

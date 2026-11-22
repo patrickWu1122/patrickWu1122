@@ -123,6 +123,17 @@ h3{font-size:15px;margin:10px 0 8px}
 .lrow button{flex:none;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.08);color:#ddd;font:600 13px -apple-system,sans-serif;border-radius:16px;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .lrow button i{width:14px;height:14px;border-radius:50%;display:block}.lrow button.on{border-color:var(--y);color:var(--y)}
 #lookAmtRow{padding:4px 18px 0}#lookAmtRow.off,#fAmtRow.off{opacity:.35;pointer-events:none}
+#compChip{position:absolute;left:10px;top:10px;z-index:2;appearance:none;border:0;background:rgba(255,210,63,.92);color:#000;font:600 12.5px -apple-system,sans-serif;border-radius:14px;padding:5px 10px;display:none;align-items:center;gap:6px;cursor:pointer}#compChip.show{display:flex}#compChip i{font-style:normal;opacity:.6}
+.cchips{display:flex;gap:6px;margin:4px 0 10px}.cchips button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#ddd;font:600 13px -apple-system,sans-serif;border-radius:16px;padding:6px 14px;cursor:pointer}.cchips button.on{background:#fff;color:#000}
+.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ccard{appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.06);border-radius:14px;padding:6px 6px 8px;color:#fff;text-align:left;cursor:pointer;transition:transform .2s var(--ease)}.ccard:active{transform:scale(.97)}.ccard.on{border-color:var(--y)}
+.cth{position:relative;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:#000}.cth img,.cth .svgw,.cth .svgw svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.cth canvas{position:absolute;inset:0;width:100%;height:100%}
+.ccard b{display:block;font-size:14px;margin:6px 2px 0}.ccard small{display:block;color:var(--dim);font-size:12px;margin:0 2px}
+#compView{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:9;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}#compView.show{display:flex;animation:up .32s var(--ease)}
+.cvtag{font-size:13px;color:var(--dim)}.cvbody{flex:1;overflow-y:auto;padding:0 18px}
+.cvimg{position:relative;width:min(100%,46dvh);margin:0 auto;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:#111}.cvimg #cvImg,.cvimg #cvImg img,.cvimg #cvImg .svgw,.cvimg #cvImg svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}#cvOv{position:absolute;inset:0}
+#compView h2{font-size:22px;margin:14px 0 6px}#cvWhy{color:#ddd;margin:0 0 10px;font-size:15px}
+#cvSteps{list-style:none;padding:0;margin:0;display:grid;gap:8px}#cvSteps li{display:flex;gap:10px;align-items:flex-start;font-size:15px}#cvSteps i{font-style:normal;flex:none;width:22px;height:22px;border-radius:50%;background:var(--y);color:#000;font-weight:700;font-size:13px;display:grid;place-items:center}
 .hidden{display:none!important}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
@@ -140,6 +151,7 @@ h3{font-size:15px;margin:10px 0 8px}
   <canvas id="lv"></canvas>
   <canvas id="ov"></canvas>
   <div id="chip"></div>
+  <button id="compChip"><span></span><i>✕</i></button>
   <div id="zoom"></div><div id="zoomToast"></div>
   <div id="expRow"><span>曝光</span><input type="range" id="expSl" min="-2" max="2" step=".1" value="0"><b id="expV">0.0</b></div>
   <div id="poseToast"></div>
@@ -159,10 +171,10 @@ h3{font-size:15px;margin:10px 0 8px}
 
 <div id="sheet">
  <div id="grab"><i></i></div>
- <div class="stabs"><button class="stab on" data-t="pTips">建議</button><button class="stab" data-t="pRec">拍法</button><button class="stab" data-t="pTrain">訓練</button><button class="stab" data-t="pSet">設定</button></div>
+ <div class="stabs"><button class="stab on" data-t="pTips">建議</button><button class="stab" data-t="pRec">構圖法</button><button class="stab" data-t="pTrain">訓練</button><button class="stab" data-t="pSet">設定</button></div>
  <div class="sbody">
   <div id="pTips"><ul class="tips" id="tips"><li>開始取景後，這裡會列出所有建議。</li></ul></div>
-  <div id="pRec" class="hidden"><div id="recPane"><h3>人像拍法</h3><div id="recSel"></div><p class="hint">置中全身、三分法人像、半身特寫、環境人像參考 slay composition guides（CC BY 4.0，slaycamera.com）。</p></div></div>
+  <div id="pRec" class="hidden"><div class="cchips" id="compChips"><button data-f="all" class="on">全部</button><button data-f="人像">人像</button><button data-f="風景">風景</button></div><div class="cgrid" id="compGrid"></div><p class="hint">點一張看構圖後的成品與要點，再按「用這個構圖拍」。範例照片：slay composition guides（CC BY 4.0，slaycamera.com）；其餘為示意圖。</p><div id="recPane" class="hidden"><h3>人像拍法</h3><div id="recSel"></div><p class="hint">置中全身、三分法人像、半身特寫、環境人像參考 slay composition guides（CC BY 4.0，slaycamera.com）。</p></div></div>
   <div id="pTrain" class="hidden">
    <h3 id="trT">訓練：人像模型</h3>
    <div class="train"><canvas id="heat" width="120" height="160"></canvas><div><div class="big" id="trN">0</div><div class="hint" style="margin:0">張參考照片</div><div class="kv" id="trKV"></div></div></div>
@@ -178,6 +190,10 @@ h3{font-size:15px;margin:10px 0 8px}
  </div>
 </div>
 <div id="sheetBg"></div>
+<div id="compView"><div class="vtop"><button class="tbtn" id="cvClose">關閉</button><span id="cvTag" class="cvtag"></span><span style="width:52px"></span></div>
+ <div class="cvbody"><div class="cvimg"><div id="cvImg"></div><canvas id="cvOv"></canvas></div>
+  <h2 id="cvTitle"></h2><p id="cvWhy"></p><ol id="cvSteps"></ol><p class="hint" id="cvCredit">範例照片：slay composition guides（CC BY 4.0，slaycamera.com）。黃線是構圖輔助線，綠色虛線是地平線的位置。</p></div>
+ <div class="vbot"><button class="btn pri" id="cvUse">用這個構圖拍</button></div></div>
 <div id="viewer"><div class="vtop"><button class="tbtn" id="closeV">完成</button><span></span><button class="tbtn" id="saveBtn">儲存</button></div>
  <div class="vbody"><img id="vImg" alt="剛拍的照片"><video id="vVid" class="hidden" controls playsinline></video></div>
  <div class="vbot"><p id="saveHint"></p><button class="btn pri" id="editBtn">編輯・濾鏡・景深</button></div></div>
@@ -206,7 +222,7 @@ const RECIPES={
  thirds:{n:'三分法人像',eyeY:1/3,off:1/6,steps:['手機在主角胸口高度','用 2x 變焦，站 4 公尺以外','頭放在上方三分線上']},
  tele:{n:'半身特寫',eyeY:1/3,off:0,steps:['退到 4 公尺以外，用 3x 變焦','背景會被壓縮得很乾淨、有雜誌感','頭放在上方三分線上']},
  env:{n:'環境人像',eyeY:1/3,off:.22,steps:['退到 8 公尺以外，用 3–4x','主角放在畫面一側','另一側留給場景說故事']}};
-let recipe='auto';try{recipe=localStorage.getItem('fc_recipe')||'auto'}catch(e){}
+let recipe='auto';
 /* ---------- learned models (per mode, stored on this device) ---------- */
 const KEY='fc_models_v1';
 let M={portrait:{s:[]},landscape:{s:[]}};
@@ -460,7 +476,7 @@ function renderTips(items,minor){if(!$('sheet').classList.contains('open'))retur
 /* ---------- 60fps overlay drawing ---------- */
 let rT=0,KF=1;const K=b=>1-Math.pow(1-b,KF);
 function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-rT)/1000):1/60;rT=now;KF=dt*60;drawLive();if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
- if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
+ if(comp&&COMPBY[comp]){const C=COMPBY[comp];drawCompOv(c,W,H,C.ov,'rgba(255,255,255,.4)',C.land&&C.land.hy)}else if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
  const ready=$('shutter').classList.contains('ready');
  if(mode==='portrait'&&state.ghost){const g=state.ghost;
   // ghost silhouette (where to stand + which pose)
@@ -524,7 +540,7 @@ $('poses').querySelectorAll('button').forEach(b=>b.onclick=()=>{poseId=b.dataset
 /* ---------- bottom sheet ---------- */
 const sheet=$('sheet');$('more').onclick=()=>{sheet.classList.add('open');updateGuide()};$('sheetBg').onclick=()=>sheet.classList.remove('open');
 let sy0=null;$('grab').addEventListener('touchstart',e=>{sy0=e.touches[0].clientY},{passive:true});$('grab').addEventListener('touchend',e=>{if(sy0!=null&&e.changedTouches[0].clientY-sy0>40)sheet.classList.remove('open');sy0=null},{passive:true});
-document.querySelectorAll('.stab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.stab').forEach(x=>{x.classList.toggle('on',x===t);$(x.dataset.t).classList.toggle('hidden',x!==t)})});
+document.querySelectorAll('.stab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.stab').forEach(x=>{x.classList.toggle('on',x===t);$(x.dataset.t).classList.toggle('hidden',x!==t)});if(t.dataset.t==='pRec')renderComps()});
 $('recSel').innerHTML=Object.entries(RECIPES).map(([k,v])=>`<button class="ropt ${k===recipe?'on':''}" data-r="${k}"><b>${v.n}</b><small>${v.steps.join('・')||'依偵測到的全身／半身自動判斷'}</small></button>`).join('');
 $('recSel').querySelectorAll('.ropt').forEach(b=>b.onclick=()=>{recipe=b.dataset.r;try{localStorage.setItem('fc_recipe',recipe)}catch(e){}$('recSel').querySelectorAll('.ropt').forEach(x=>x.classList.toggle('on',x===b));SM.ghost=null;renderTrain()});
 $('flipLv').checked=flipLevel;$('flipLv').onchange=e=>{flipLevel=e.target.checked;roll=null;try{localStorage.setItem('fc_flip',flipLevel?'1':'0')}catch(err){}};
@@ -734,6 +750,109 @@ $('shutter').onclick=async()=>{if(!stream){start();return}if(!vid.videoWidth)ret
 // record the filtered picture when a look is on
 const _startRec=startRec;startRec=function(){if(look.id!=='none'&&lvC.captureStream){const s0=stream;stream=new MediaStream([...lvC.captureStream(30).getVideoTracks(),...s0.getAudioTracks()]);try{_startRec()}finally{stream=s0}}else _startRec()};
 
+/* =================== composition library (構圖法) =================== */
+// person silhouette for illustrations
+const SP=(x,y,h,c='#1b1b1f')=>{const s=h/100;return`<g transform="translate(${x} ${y}) scale(${s})" fill="${c}"><circle cx="0" cy="-88" r="10"/><path d="M-11-76h22l4 34-6 2v38h-6l-3-30-3 30h-6V-40l-6-2z"/></g>`};
+const SKY=(a,b)=>`<defs><linearGradient id="g${a.slice(1)}${b.slice(1)}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="300" height="400" fill="url(#g${a.slice(1)}${b.slice(1)})"/>`;
+const SV=b=>`<svg viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">${b}</svg>`;
+const ILL={
+ legs:SV(SKY('#8ec5ff','#e8f4ff')+'<rect y="330" width="300" height="70" fill="#c9b79c"/><g opacity=".5" fill="#fff"><ellipse cx="70" cy="70" rx="40" ry="12"/><ellipse cx="220" cy="110" rx="50" ry="14"/></g>'+SP(150,372,340)),
+ golden:SV(SKY('#ffb88c','#ffe3c7')+'<circle cx="230" cy="120" r="26" fill="#fff4d6"/><rect y="290" width="300" height="110" fill="#6b8f5a"/>'+SP(114,360,230)),
+ negative:SV(SKY('#dbe9f4','#f5f8fb')+'<rect y="300" width="300" height="100" fill="#e9dcc3"/><path d="M0 300q75-8 150 0t150 0v6H0z" fill="#bcd6e6"/>'+SP(62,340,70)),
+ leading:SV(SKY('#9fd0ff','#e6f3ff')+'<rect y="180" width="300" height="220" fill="#7fa86a"/><path d="M150 180 300 400H0z" fill="#59595f"/><path d="M150 180l8 220h-16z" fill="#f5f5f5" opacity=".8"/><g fill="#3f6b3a"><circle cx="40" cy="200" r="22"/><circle cx="262" cy="196" r="20"/><circle cx="18" cy="250" r="30"/><circle cx="285" cy="252" r="28"/></g>'+SP(150,236,66)),
+ frame:SV('<rect width="300" height="400" fill="#3a3530"/>'+'<rect x="40" y="60" width="220" height="300" fill="#bfe3ff"/><rect x="40" y="280" width="220" height="80" fill="#9bc48a"/>'+SP(150,345,210)+'<rect x="40" y="60" width="220" height="300" fill="none" stroke="#2a2622" stroke-width="10"/>'),
+ diag:SV(SKY('#c7e0ff','#f0f7ff')+'<path d="M0 400 300 120V400z" fill="#8a7f72"/><path d="M0 400 300 150" stroke="#fff" stroke-width="3" opacity=".7"/>'+SP(210,262,170)),
+ sym:SV(SKY('#ffcf9c','#ffeedd')+'<path d="M0 200 70 120 120 170 180 90 240 160 300 120V200z" fill="#6c6a8a"/><rect y="200" width="300" height="200" fill="#9fb8d6"/><path d="M0 200 70 280 120 230 180 310 240 240 300 280V200z" fill="#7f86a6" opacity=".7"/>'),
+ tri:SV(SKY('#b8dcff','#eef7ff')+'<path d="M30 330 150 100 270 330z" fill="#6f7d8c"/><path d="M150 100 120 158 138 150 150 170 164 148 180 158z" fill="#fff"/><rect y="330" width="300" height="70" fill="#7da36a"/>'),
+ scurve:SV(SKY('#bfe6ff','#eaf7ff')+'<rect y="110" width="300" height="290" fill="#86b46e"/><path d="M150 110c-60 40 80 80 20 130s-120 70-40 160h70c-60-80 50-110 30-160S170 140 160 110z" fill="#5aa0d6"/>'),
+ vanish:SV(SKY('#c9dcf0','#eef4fb')+'<rect y="170" width="300" height="230" fill="#8b7e6c"/><path d="M150 170 60 400M150 170 240 400" stroke="#444" stroke-width="6"/><g stroke="#5b4a3a" stroke-width="5">'+[0,1,2,3,4,5,6,7].map(i=>{const t=(i/7)**1.6,y=170+230*t,w=12+130*t;return`<path d="M${150-w} ${y}h${2*w}"/>`}).join('')+'</g>'),
+};
+const COMP=[
+ {id:'thirds',n:'三分法（九宮格）',tag:'人像',mode:'portrait',img:'02-portrait-2',ov:'thirds',ghost:{x:'third',top:.26,foot:.95},
+  why:'九宮格就是三分法：畫面切成 3×3，把主角的頭放在上方的三分線上，身體站在左或右的直線上，比置中更有變化。',steps:['手機在主角胸口高度','用 2x 變焦，站 4 公尺以外','頭放在上方的三分線上','身體站在左或右的直線上']},
+ {id:'center',n:'置中構圖',tag:'人像',mode:'portrait',img:'01-portrait-1',ov:'center',ghost:{x:.5,top:.42,foot:.86},
+  why:'主角站在畫面正中央，四周保留環境，看起來穩定又有自信，適合拍完整的穿搭。',steps:['手機在主角胸口高度','用 1.5x 變焦，比例最自然','站在 4 公尺以外','主角的頭對準畫面中心']},
+ {id:'legs',n:'網美長腿',tag:'人像',mode:'portrait',svg:'legs',ov:'thirds',ghost:{x:.5,top:.13,foot:.94},
+  why:'「腳貼地、天留空」：手機放低往上拍，腳尖貼近畫面底部，腿會顯得特別長，是 IG 最常見的全身拍法。',steps:['手機放到腰部或膝蓋高度','鏡頭微微往上仰','腳尖貼近畫面底部（不要切到）','頭頂上方留一點天空']},
+ {id:'tele',n:'半身特寫',tag:'人像',mode:'portrait',img:'03-close-up',ov:'thirds',ghost:{half:true,x:.5,eyeY:.33},
+  why:'退遠一點再放大，背景會被壓縮得乾淨，臉也不會變形，有雜誌感。',steps:['退到 4 公尺以外','用 3x 變焦','眼睛放在上方三分線','底邊切在腰或大腿中段，不要切在關節']},
+ {id:'env',n:'環境人像',tag:'人像',mode:'portrait',img:'04-side-chick',ov:'thirds',ghost:{x:'side',top:.3,foot:.86},
+  why:'主角站在畫面一側，另一側留給場景（咖啡廳、門口、街道），照片在說「他在哪裡」。',steps:['退到 8 公尺以外，用 3–4x','主角放在左或右側','頭靠近上方三分線','另一側留給場景']},
+ {id:'golden',n:'黃金比例',tag:'人像',mode:'portrait',svg:'golden',ov:'phi',ghost:{x:'phi',top:.32,foot:.94},
+  why:'比三分法更貼近黃金比例 0.618：主角的頭放在螺旋的中心點，視線會自然沿著螺旋走向主角。',steps:['主角站在 0.382 或 0.618 的直線上','頭放在螺旋的中心點','螺旋展開的那一側放天空或空間']},
+ {id:'negative',n:'留白構圖',tag:'人像',mode:'portrait',svg:'negative',ov:'thirds',ghost:{x:'edge',top:.62,foot:.9},
+  why:'主角很小、放在角落，大片乾淨的天空或海面當背景，畫面簡潔、有故事感。',steps:['找乾淨的背景（天空、海、牆）','主角放在畫面角落的交點附近','主角只佔畫面一小塊','視線朝向留白的那一側']},
+ {id:'leading',n:'引導線',tag:'人像',mode:'portrait',svg:'leading',ov:'lead',ghost:{x:.5,top:.46,foot:.76},
+  why:'利用道路、走廊、欄杆等線條，把觀看者的視線一路帶到主角身上。',steps:['找會延伸出去的線條（路、步道、欄杆）','主角站在線條匯集的地方','手機放低，讓線條從畫面底部開始']},
+ {id:'frame',n:'框中框',tag:'人像',mode:'portrait',svg:'frame',ov:'frame',ghost:{x:.5,top:.24,foot:.86},
+  why:'用門框、窗戶、拱門、樹枝當作畫面裡的第二個框，把焦點鎖在主角身上，很有層次。',steps:['找門、窗、拱門或樹枝','主角站在框的正中間','框的邊緣放在畫面外圍','對焦在主角身上']},
+ {id:'diag',n:'對角線',tag:'人像',mode:'portrait',svg:'diag',ov:'diag',ghost:{x:'third',top:.3,foot:.9},
+  why:'讓主要線條（樓梯、坡道、身體的斜線）沿著對角線走，畫面會有動感。',steps:['找斜的線條（樓梯、坡、牆）','讓線條從一個角延伸到另一個角','主角站在對角線上的三分點']},
+ {id:'travel',n:'小人物大風景',tag:'風景',mode:'portrait',img:'05-travel-shot',ov:'thirds',ghost:{x:.5,top:.7,foot:.9},
+  why:'經典旅遊照：人很小、站在底部中間，地標和風景佔滿上方，主角是「這個地方」。',steps:['背對太陽，順光拍','站高一點，往下約 15°','距離 5–10 公尺，用 2–3x','主角小小的放在底部中間']},
+ {id:'onethird',n:'地平線在下 1/3',tag:'風景',mode:'landscape',img:'06-one-third',ov:'thirds',land:{hy:.7},
+  why:'天空佔三分之二，景物（橋、建築、地平線）壓在下方三分之一，畫面通透、很 IG。這是從範例照片量出來的位置：約在 70%。',steps:['天空好看的時候用','手機平舉在眼睛高度','用 1.5x 變焦','地平線放在下方三分線附近']},
+ {id:'twothird',n:'主體佔 2/3',tag:'風景',mode:'landscape',img:'07-two-third',ov:'thirds',land:{hy:.75,sx:.5},
+  why:'高高的主體（塔、樹、建築）往上佔滿畫面的三分之二，下方留一條地面平衡。範例照片量到地平線約在 75%。',steps:['手機平舉在眼睛高度','用 1.5x，站 3 公尺以外','主體從地面一路延伸到上方','地平線壓低在約 3/4 的位置']},
+ {id:'sym',n:'對稱構圖',tag:'風景',mode:'landscape',svg:'sym',ov:'sym',land:{hy:.5,sym:true},
+  why:'湖面倒影、建築正面：讓畫面左右或上下對稱，是唯一適合把地平線放正中間的構圖。',steps:['找有倒影的水面或對稱的建築','地平線（水面）放在正中間','手機一定要拿水平']},
+ {id:'tri',n:'三角形構圖',tag:'風景',mode:'landscape',svg:'tri',ov:'tri',land:{hy:.82,sx:.5},
+  why:'山峰、屋頂或三個主體排成三角形，畫面穩定又有重心。',steps:['找山峰、屋頂這類三角形','頂點放在畫面中線上方','底邊壓在下方三分之一']},
+ {id:'scurve',n:'S 形曲線',tag:'風景',mode:'landscape',svg:'scurve',ov:'scurve',land:{hy:.28},
+  why:'河流、小路、海岸線彎成 S 形，帶著視線在畫面裡游走，很有韻律感。',steps:['站高一點拍河流或小路','讓曲線從畫面底部開始','曲線往遠方延伸到上方','地平線壓在上方三分之一']},
+ {id:'vanish',n:'消失點',tag:'風景',mode:'landscape',svg:'vanish',ov:'lead',land:{hy:.42,sx:.5},
+  why:'鐵軌、長廊、道路往遠方收成一點，畫面立刻有深度。範例：桌角的線條也能收向主體。',steps:['站在線條正中間','手機平舉','消失點放在畫面中線附近','可以讓人走在線條上']},
+];
+const COMPBY=Object.fromEntries(COMP.map(c=>[c.id,c]));
+let comp=null;try{comp=localStorage.getItem('fc_comp')||null;if(comp&&!COMPBY[comp])comp=null}catch(e){}
+
+/* overlay lines for each method (live viewfinder + previews) */
+function drawCompOv(c,W,H,ov,col='rgba(255,255,255,.55)',tgt){c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=1.2;c.beginPath();
+ const L=(x1,y1,x2,y2)=>{c.moveTo(x1,y1);c.lineTo(x2,y2)};
+ if(ov==='thirds'){for(const p of P3){L(W*p,0,W*p,H);L(0,H*p,W,H*p)}c.stroke();for(const a of P3)for(const b of P3){c.beginPath();c.arc(W*a,H*b,3,0,7);c.fill()}}
+ else if(ov==='center'){L(W/2,0,W/2,H);L(0,H/2,W,H/2);c.stroke();c.beginPath();c.arc(W/2,H/2,Math.min(W,H)*.06,0,7);c.stroke()}
+ else if(ov==='phi'){const a=.382,b=.618;L(W*a,0,W*a,H);L(W*b,0,W*b,H);L(0,H*a,W,H*a);L(0,H*b,W,H*b);c.stroke();
+  c.beginPath();const cx=W*a,cy=H*a,k=.3063;for(let t=0;t<=4.6*Math.PI;t+=.05){const r=4*Math.exp(k*t),x=cx+r*Math.cos(t+Math.PI),y=cy+r*Math.sin(t+Math.PI);if(t===0)c.moveTo(x,y);else c.lineTo(x,y)}c.lineWidth=1.6;c.stroke()}
+ else if(ov==='diag'){L(0,H,W,0);L(0,0,W,H);c.stroke();c.setLineDash([4,5]);c.beginPath();const t=H*H/(W*W+H*H),t2=W*W/(W*W+H*H);L(0,H,W*t,H*t);L(W,0,W*t2,H*t2);c.stroke();c.setLineDash([])}
+ else if(ov==='lead'){const vx=W*.5,vy=H*(tgt!=null?tgt:.45);for(const[x,y]of[[0,H],[W,H],[0,H*.7],[W,H*.7],[W*.25,H],[W*.75,H]])L(x,y,vx,vy);c.stroke();c.beginPath();c.arc(vx,vy,5,0,7);c.fill()}
+ else if(ov==='frame'){c.strokeRect(W*.12,H*.12,W*.76,H*.76);c.setLineDash([4,5]);c.strokeRect(W*.04,H*.04,W*.92,H*.92);c.setLineDash([])}
+ else if(ov==='sym'){L(W/2,0,W/2,H);c.stroke();c.setLineDash([6,5]);c.beginPath();L(0,H/2,W,H/2);c.stroke();c.setLineDash([])}
+ else if(ov==='tri'){c.moveTo(W*.12,H*.82);c.lineTo(W*.5,H*.22);c.lineTo(W*.88,H*.82);c.closePath();c.stroke();c.setLineDash([4,5]);c.beginPath();L(0,H*2/3,W,H*2/3);c.stroke();c.setLineDash([])}
+ else if(ov==='scurve'){c.moveTo(W*.45,H);c.bezierCurveTo(W*.05,H*.75,W*.95,H*.6,W*.5,H*.42);c.bezierCurveTo(W*.2,H*.32,W*.65,H*.3,W*.52,H*.28);c.lineWidth=2;c.stroke()}
+ c.restore()}
+
+/* ghost placement by method (overrides the generic recipe) */
+const _ghostPlace=ghostPlace;
+ghostPlace=function(lm,shot,personX){const C=comp&&COMPBY[comp];if(!C||!C.ghost||mode!=='portrait')return _ghostPlace(lm,shot,personX);const g=C.ghost,P=POSES[poseId],side=personX!=null&&personX>.5;
+ const tx=g.x==='third'?(side?2/3:1/3):g.x==='side'?(side?.72:.28):g.x==='phi'?(side?.618:.382):g.x==='edge'?(side?.8:.2):g.x;
+ if(g.half){const s=(1.05-g.eyeY)/1.55;return{s,ox:tx,oy:1.05,half:true,P}}const s=(g.foot-g.top)/3.68;return{s,ox:tx,oy:g.top+1.78*s,half:false,P}};
+/* landscape targets by method */
+const _guideLand=guideLand;
+guideLand=function(s,live){const C=comp&&COMPBY[comp];if(!C||!C.land)return _guideLand(s,live);const base=learned(),lm={...base,n:3,low:C.land.hy,high:C.land.hy,pLow:1,sx:C.land.sx!=null?(C.land.sx===.5?.5:C.land.sx):base.sx,sym:!!C.land.sym};
+ const a=adviseLand(s,lm,tilt);let list=a.list;if(lm.sym)list=list.filter(i=>i.k!=='mid');if(C.land.sx===.5){list=list.filter(i=>i.k!=='sub');if(Math.abs(s.sx-.5)>.12)list.push({k:'sub',who:'cam',act:s.sx>.5?'鏡頭往右移一點':'鏡頭往左移一點',why:'這個構圖要把主體放在畫面中線上',p:50})}
+ list.sort((x,y)=>y.p-x.p);list=stable(list,live);const ready=!list.some(i=>i.p>=45);return{list,ready,msg:ready?'✓ 可以拍了':list[0].act.split('：')[0],target:{hy:C.land.hy},sal:{x:s.sx,y:s.sy},hy:s.hy,ang:s.ang}};
+
+/* ---------- 構圖法 tab: cards + detail view ---------- */
+let compFilter='all';
+function compThumb(C){return C.img?`<img src="comp/${C.img}.jpg" alt="" loading="lazy">`:`<div class="svgw">${ILL[C.svg]}</div>`}
+function renderComps(){$('compChips').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.f===compFilter));
+ $('compGrid').innerHTML=COMP.filter(C=>compFilter==='all'||C.tag===compFilter).map(C=>`<button class="ccard ${C.id===comp?'on':''}" data-c="${C.id}"><div class="cth">${compThumb(C)}<canvas></canvas></div><b>${C.n}</b><small>${C.tag}${C.id===comp?' · 使用中':''}</small></button>`).join('');
+ $('compGrid').querySelectorAll('.ccard').forEach(b=>{const C=COMPBY[b.dataset.c],cv=b.querySelector('canvas');requestAnimationFrame(()=>{const r=cv.getBoundingClientRect(),d=2;cv.width=r.width*d;cv.height=r.height*d;const x=cv.getContext('2d');x.scale(d,d);drawCompOv(x,r.width,r.height,C.ov,'rgba(255,210,63,.9)',C.land&&C.land.hy)});b.onclick=()=>openComp(C.id)})}
+$('compChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{compFilter=b.dataset.f;renderComps()});
+let compOpen=null,compAnim=0;
+function openComp(id){const C=COMPBY[id];compOpen=id;$('cvTitle').textContent=C.n;$('cvTag').textContent=C.tag+(C.mode==='landscape'?'・風景模式':'・人像模式');$('cvWhy').textContent=C.why;
+ $('cvSteps').innerHTML=C.steps.map((t,i)=>`<li><i>${i+1}</i>${t}</li>`).join('');$('cvImg').innerHTML=compThumb(C);$('cvCredit').classList.toggle('hidden',!C.img);
+ $('cvUse').textContent=comp===id?'取消使用這個構圖':'用這個構圖拍';$('cvUse').classList.toggle('pri',comp!==id);$('compView').classList.add('show');
+ // animate the guide lines drawing in over the example
+ const cv=$('cvOv');requestAnimationFrame(()=>{const box=$('cvImg').getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);cv.width=box.width*d;cv.height=box.height*d;cv.style.width=box.width+'px';cv.style.height=box.height+'px';const x=cv.getContext('2d');let t0=0;cancelAnimationFrame(compAnim);
+  const step=t=>{if(!t0)t0=t;const k=Math.min(1,(t-t0)/600);x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,box.width,box.height);x.globalAlpha=k;drawCompOv(x,box.width,box.height,C.ov,'rgba(255,210,63,.95)',C.land&&C.land.hy);if(C.land&&C.land.hy!=null){x.setLineDash([8,6]);x.strokeStyle='rgba(74,222,128,.95)';x.lineWidth=2;x.beginPath();x.moveTo(0,box.height*C.land.hy);x.lineTo(box.width,box.height*C.land.hy);x.stroke();x.setLineDash([])}if(k<1)compAnim=requestAnimationFrame(step)};compAnim=requestAnimationFrame(step)})}
+$('cvClose').onclick=()=>$('compView').classList.remove('show');
+$('cvUse').onclick=()=>{const C=COMPBY[compOpen];if(comp===compOpen){setComp(null)}else{setComp(compOpen);if(C.mode==='landscape'&&mode!=='landscape')setUIMode('landscape');if(C.mode==='portrait'&&(mode!=='portrait'))setUIMode('portrait')}$('compView').classList.remove('show');$('sheet').classList.remove('open')};
+function setComp(id){comp=id;try{id?localStorage.setItem('fc_comp',id):localStorage.removeItem('fc_comp')}catch(e){}SM.ghost=null;pillText='';const el=$('compChip');el.classList.toggle('show',!!id);if(id)el.querySelector('span').textContent='構圖：'+COMPBY[id].n;renderComps()}
+$('compChip').onclick=()=>setComp(null);
+setComp(comp);
+
+renderComps();
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>

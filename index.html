@@ -43,7 +43,7 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);font:16px/1.4 -a
 #chip.show{opacity:1;transform:translate(-50%,0)}
 #poseToast{position:absolute;left:50%;top:44px;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:12px;padding:8px 12px;font-size:13px;max-width:88%;text-align:center;opacity:0;pointer-events:none}
 #poseToast.show{animation:toast 2.6s var(--ease) forwards}@keyframes toast{0%{opacity:0;transform:translate(-50%,6px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
-#cover{position:absolute;inset:0;display:grid;place-items:center;background:#000;text-align:center;padding:24px;transition:opacity .4s var(--ease);z-index:3}
+#cover{position:absolute;inset:0;display:grid;place-items:center;background:#000;text-align:center;padding:24px;transition:opacity .4s var(--ease);z-index:3;pointer-events:none}#cover b{font-size:17px}
 #cover.gone{opacity:0;pointer-events:none}
 #cover .go{width:76px;height:76px;border-radius:50%;border:4px solid #fff;display:grid;place-items:center;margin:0 auto 14px}#cover .go i{width:58px;height:58px;border-radius:50%;background:#fff;display:block}
 #cover p{color:var(--dim);font-size:14px;margin:6px 0 0}
@@ -117,6 +117,12 @@ h3{font-size:15px;margin:10px 0 8px}
 .arow{display:flex;align-items:center;gap:12px;padding:10px 18px}.arow input{flex:1;accent-color:var(--y);height:34px}.arow b{width:44px;text-align:right;font-variant-numeric:tabular-nums}.ap{color:var(--dim);font-size:14px}
 .crow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:6px 14px}.crow button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#ddd;font:600 14px -apple-system,sans-serif;border-radius:10px;padding:10px 14px;cursor:pointer;min-width:56px}.crow button.on{border-color:var(--y);color:var(--y)}
 .etabs{flex:none;display:flex;justify-content:center;gap:26px;padding:8px 0 10px}.etab{appearance:none;border:0;background:none;color:var(--dim);font:600 14px -apple-system,sans-serif;padding:8px 2px;cursor:pointer}.etab.on{color:var(--y)}
+#lv{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none}
+.looks{flex:none;display:none;flex-direction:column;padding:6px 0 0}.looks.show{display:flex}.looks.show~.poses{display:none}
+.lrow{display:flex;gap:8px;overflow-x:auto;padding:4px 14px;scrollbar-width:none}.lrow::-webkit-scrollbar{display:none}
+.lrow button{flex:none;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.08);color:#ddd;font:600 13px -apple-system,sans-serif;border-radius:16px;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.lrow button i{width:14px;height:14px;border-radius:50%;display:block}.lrow button.on{border-color:var(--y);color:var(--y)}
+#lookAmtRow{padding:4px 18px 0}#lookAmtRow.off,#fAmtRow.off{opacity:.35;pointer-events:none}
 .hidden{display:none!important}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
@@ -127,18 +133,20 @@ h3{font-size:15px;margin:10px 0 8px}
   <button class="ic" id="more" aria-label="詳細建議與設定"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
   <div id="status">載入 AI 偵測中…</div>
   <div id="recTime">00:00</div>
-  <div class="tr"><div id="lvl"></div><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
+  <div class="tr"><div id="lvl"></div><button class="ic" id="lookBtn" aria-label="濾鏡"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></svg></button><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
  </div>
  <div class="vfwrap"><div class="vf" id="stage">
   <video id="vid" playsinline muted autoplay></video>
+  <canvas id="lv"></canvas>
   <canvas id="ov"></canvas>
   <div id="chip"></div>
   <div id="zoom"></div><div id="zoomToast"></div>
   <div id="expRow"><span>曝光</span><input type="range" id="expSl" min="-2" max="2" step=".1" value="0"><b id="expV">0.0</b></div>
   <div id="poseToast"></div>
-  <div id="cover"><div><div class="go"><i></i></div><b>點一下開始取景</b><p id="coverMsg">第一次會詢問相機與動作感測（水平儀）權限，請按「允許」</p></div></div>
+  <div id="cover"><div><b>按下方快門開始取景</b><p id="coverMsg">第一次會詢問相機與水平儀權限，請按「允許」</p></div></div>
  </div></div>
  <div class="guide"><div id="pill"><b></b><small></small></div></div>
+ <div class="looks" id="looks"><div class="lrow" id="lookRow"></div><div class="arow" id="lookAmtRow"><span class="ap">強度</span><input type="range" id="lookAmt" min="0" max="100" value="100"><b id="lookAmtV">100</b></div></div>
  <div class="poses" id="poses"></div>
  <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div>
  <div class="ctrl">
@@ -176,7 +184,7 @@ h3{font-size:15px;margin:10px 0 8px}
 <div id="editor"><div class="vtop"><button class="tbtn" id="eCancel">取消</button><span>編輯</span><button class="tbtn y" id="eSave">儲存</button></div>
  <div class="ebox" id="ebox"><canvas id="ecv"></canvas></div><p class="ehint">按住照片看原圖</p>
  <div class="epanel">
-  <div id="eF"><div class="fstrip" id="fStrip"></div></div>
+  <div id="eF"><div class="fstrip" id="fStrip"></div><div class="arow" id="fAmtRow"><span class="ap">強度</span><input type="range" id="fAmt" min="0" max="100" value="100"><b id="fAmtV">100</b></div></div>
   <div id="eA" class="hidden"><div class="achips" id="aChips"></div><div class="arow"><input type="range" id="aSl"><b id="aV">0</b><button class="tbtn" id="aReset">重設</button></div></div>
   <div id="eD" class="hidden"><div class="arow"><span class="ap">光圈</span><input type="range" id="dSl" style="direction:rtl"><b id="dV">f/16</b></div><p class="ehint" id="dState"></p></div>
   <div id="eC" class="hidden"><div class="crow" id="cRow"></div><p class="ehint">裁切會自動把主角放在三分線上</p></div>
@@ -240,17 +248,20 @@ function detectPeople(src,isImage){const g=lumGrid(src,160);let f=null,kp=null;
  const ar=(src.videoWidth||src.width)/(src.videoHeight||src.height);return{f,kp,light,aspect:ar}}
 
 /* landscape: horizon line + tilt + salient point */
-function detectScene(src){const{W,H,d}=lumGrid(src,160),lum=new Float32Array(W*H);let all=0,hi=0;for(let i=0;i<W*H;i++){lum[i]=L(d,i*4);all+=lum[i];if(lum[i]>.97)hi++}all/=W*H;
- const ys=[],xs=[];for(let x=4;x<W-4;x+=4){let by=-1,bv=0;for(let y=Math.floor(H*.12);y<H*.88;y++){let v=0;for(let k=-1;k<=1;k++)v+=lum[(y-2)*W+x+k]+lum[(y-1)*W+x+k]-lum[(y+1)*W+x+k]-lum[(y+2)*W+x+k];if(v>bv){bv=v;by=y}}if(bv>.35){xs.push(x);ys.push(by)}}
- let hy=null,ang=0;if(xs.length>W/10){// robust line fit: drop outliers vs median
-  const med=[...ys].sort((a,b)=>a-b)[ys.length>>1],kx=[],ky=[];xs.forEach((x,i)=>{if(Math.abs(ys[i]-med)<H*.12){kx.push(x);ky.push(ys[i])}});
-  if(kx.length>xs.length*.5){const mx=mean(kx),my=mean(ky);let sxy=0,sxx=0;kx.forEach((x,i)=>{sxy+=(x-mx)*(ky[i]-my);sxx+=(x-mx)**2});const sl=sxx?sxy/sxx:0;ang=Math.atan(sl)*57.3;hy=(my+sl*(W/2-mx))/H}}
- // sky texture above horizon
- let skyTex=0,skyL=0;if(hy){const yb=Math.max(2,hy*H-3)|0;let n=0,m=0;for(let y=1;y<yb;y++)for(let x=1;x<W-1;x++){skyTex+=Math.abs(lum[y*W+x]-lum[y*W+x-1])+Math.abs(lum[y*W+x]-lum[(y-1)*W+x]);m+=lum[y*W+x];n++}skyTex/=n||1;skyL=m/(n||1)}
- // salient point: local contrast weighted, ignoring the top band
+/*SCENE*/
+const SCN={"g": 0.05, "band": 0.12, "win": 0.1, "minCols": 0.1, "inl": 0.5, "abs": 1, "step": 4, "half": 2, "sky": 0.0035};/*SCN — tuned on synthetic landscapes with known horizons, see train/land.js*/
+function detectScene(src){const{W,H,d}=lumGrid(src,160),lum=new Float32Array(W*H);for(let i=0;i<W*H;i++)lum[i]=L(d,i*4);return detectSceneLum(lum,W,H)}
+function detectSceneLum(lum,W,H){let all=0,hi=0;for(let i=0;i<W*H;i++){all+=lum[i];if(lum[i]>.97)hi++}all/=W*H;const hf=SCN.half;
+ const ys=[],xs=[];for(let x=4;x<W-4;x+=SCN.step){let by=-1,bv=0;for(let y=Math.max(hf,Math.floor(H*SCN.band));y<Math.min(H-hf-1,H*(1-SCN.band));y++){let v=0;for(let k=-1;k<=1;k++)for(let r=1;r<=hf;r++)v+=lum[(y-r)*W+x+k]-lum[(y+r)*W+x+k];v/=hf*1.5;if(SCN.abs)v=Math.abs(v);if(v>bv){bv=v;by=y}}if(bv>SCN.g){xs.push(x);ys.push(by)}}
+ let hy=null,ang=0;const nC=Math.floor((W-8)/SCN.step);if(xs.length>nC*SCN.minCols){// robust line fit: drop outliers vs median
+  const med=[...ys].sort((a,b)=>a-b)[ys.length>>1],kx=[],ky=[];xs.forEach((x,i)=>{if(Math.abs(ys[i]-med)<H*SCN.win){kx.push(x);ky.push(ys[i])}});
+  if(kx.length>xs.length*SCN.inl){const mx=kx.reduce((a,b)=>a+b)/kx.length,my=ky.reduce((a,b)=>a+b)/ky.length;let sxy=0,sxx=0;kx.forEach((x,i)=>{sxy+=(x-mx)*(ky[i]-my);sxx+=(x-mx)**2});const sl=sxx?sxy/sxx:0;ang=Math.atan(sl*W/W)*57.3;hy=(my+sl*(W/2-mx))/H}}
+ let skyTex=0,skyL=0;if(hy){// cloud texture on 4x4 block means (removes sensor noise), minus the smooth sky gradient
+  const yb=Math.max(4,Math.floor((Math.min(hy*H,H)-4)/4)),bw=Math.floor(W/4),B=new Float32Array(bw*yb);let m=0;for(let by=0;by<yb;by++)for(let bx=0;bx<bw;bx++){let a=0;for(let j=0;j<4;j++)for(let i=0;i<4;i++)a+=lum[(by*4+j)*W+bx*4+i];B[by*bw+bx]=a/16;m+=a/16}
+  let n=0;for(let by=1;by<yb-1;by++)for(let bx=1;bx<bw-1;bx++){const c=B[by*bw+bx],avg=(B[by*bw+bx-1]+B[by*bw+bx+1]+B[(by-1)*bw+bx]+B[(by+1)*bw+bx])/4;skyTex+=Math.abs(c-avg);n++}skyTex/=n||1;skyL=m/(bw*yb)}
  let wx=0,wy=0,ws=0;for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const v=Math.abs(lum[y*W+x]-all),c=Math.abs(lum[y*W+x+2]-lum[y*W+x-2])+Math.abs(lum[(y+2)*W+x]-lum[(y-2)*W+x]),w=(v*c)**2;wx+=x*w;wy+=y*w;ws+=w}
  return{hy,ang,skyTex,skyL,all,hi:hi/(W*H),sx:ws?wx/ws/W:.5,sy:ws?wy/ws/H:.5}}
-
+/*ENDSCENE*/
 /* ---------- guidance ---------- */
 /*PURE*/
 const THR={"feetCut": 0.95, "kneeLo": 0.95, "hipLo": 0.88, "headCut": -0.02, "footTol": 0.1, "tooSmall": 0.35, "legLow": 1, "legHigh": 2.6, "eyeLowTol": 0.1, "eyeHighTol": 0.14, "posTol": 0.13, "square": 0.69, "kneeStraight": 170, "elbowStraight": 148, "legNice": 1.45, "yaw": 0.35, "roll": 12};
@@ -311,9 +322,9 @@ function advisePortrait(r,lm){const out=[],add=(k,who,act,why,p)=>out.push({k,wh
 
 function adviseLand(s,lm,tilt){const out=[],add=(k,who,act,why,p)=>out.push({k,who,act,why,p});const tl=tilt!=null?tilt:s.ang;let th=null;
  if(Math.abs(tl)>1.2)add('tilt','cam',`畫面歪了 ${Math.abs(tl).toFixed(1)}°：手機往${tl>0?'左':'右'}轉正`,'地平線歪掉，是風景照最明顯的扣分點',90);
- if(s.hy!=null){const interesting=s.skyTex>.035;th=lm.n>=3?(interesting?lm.high:(lm.pLow>.5?lm.low:lm.high)):(interesting?1/3:2/3);const d=s.hy-th;
+ if(s.hy!=null){const interesting=s.skyTex>SCN.sky;th=lm.n>=3?(interesting?lm.high:(lm.pLow>.5?lm.low:lm.high)):(interesting?1/3:2/3);const d=s.hy-th;
   if(Math.abs(s.hy-.5)<.06)add('mid','cam',interesting?'地平線在正中間：手機往上抬，拍多一點天空':'地平線在正中間：手機往下壓，拍多一點地面','地平線在正中間，畫面會被切成兩半，比較呆板',80);
-  else if(Math.abs(d)>.07)add('hz','cam',d>0?'手機往下壓，讓地平線往上移':'手機往上抬，讓地平線往下移',interesting?'天空有雲彩，值得多拍':'天空單調，多拍地景比較有內容',70)}
+  else if(Math.abs(d)>.07)add('hz','cam',d>0?'手機往下壓，讓地平線往上移':'手機往上抬，讓地平線往下移',interesting?'天空看起來有雲彩，可以多拍一點（若天空其實很單調就反過來）':'天空看起來單調，多拍地景（若天空其實很美就反過來）',44)}
  const tx=s.sx<.5?lm.sx:1-lm.sx;if(Math.abs(s.sx-tx)>.1)add('sub','cam',s.sx>tx?'鏡頭往右移一點':'鏡頭往左移一點','把畫面中最亮眼的主體放到三分線上',50);
  if(s.hi>.06)add('sky','cam','天空過曝：點一下天空，再把亮度往下拉','天空沒有細節，就拍不出藍天白雲',75);
  if(s.all<.22)add('dark','cam','畫面太暗：手機拿穩，或靠在東西上用夜間模式','太暗容易手震模糊',60);
@@ -415,7 +426,7 @@ new ResizeObserver(()=>{if(stream)sizeOv()}).observe(stage);
 /* ---------- smoothing state for 60fps rendering ---------- */
 const SM={pts:null,ghost:null,limbs:new Array(8).fill(0),ready:0,hz:null};
 const lerp=(a,b,t)=>a+(b-a)*t;
-function smoothPts(target){if(!target){SM.pts=null;return}if(!SM.pts){SM.pts=target.map(p=>p&&{...p});return}SM.pts=target.map((p,i)=>!p?null:SM.pts[i]?{x:lerp(SM.pts[i].x,p.x,.35),y:lerp(SM.pts[i].y,p.y,.35)}:{...p})}
+function smoothPts(target){if(!target){SM.pts=null;return}if(!SM.pts){SM.pts=target.map(p=>p&&{...p});return}SM.pts=target.map((p,i)=>!p?null:SM.pts[i]?{x:lerp(SM.pts[i].x,p.x,K(.35)),y:lerp(SM.pts[i].y,p.y,K(.35))}:{...p})}
 
 /* ---------- detection loop (~12 fps, decoupled from drawing) ---------- */
 let busy=false,lastDet=0,state={g:null,m:null,ghost:null,per:null};
@@ -447,13 +458,14 @@ function renderTips(items,minor){if(!$('sheet').classList.contains('open'))retur
  $('tips').innerHTML=(items.length?items.map(li).join(''):'<li class="good"><b>目前沒有需要調整的地方</b></li>')+(minor.length?'<li class="hd">小提醒</li>'+minor.map(li).join(''):'')}
 
 /* ---------- 60fps overlay drawing ---------- */
-function render(){requestAnimationFrame(render);if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
+let rT=0,KF=1;const K=b=>1-Math.pow(1-b,KF);
+function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-rT)/1000):1/60;rT=now;KF=dt*60;drawLive();if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
  if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
  const ready=$('shutter').classList.contains('ready');
  if(mode==='portrait'&&state.ghost){const g=state.ghost;
   // ghost silhouette (where to stand + which pose)
-  const T=g.P.p.map(p=>gpt(g,p));if(!SM.ghost)SM.ghost=T;SM.ghost=SM.ghost.map((p,i)=>({x:lerp(p.x,T[i].x,.15),y:lerp(p.y,T[i].y,.15)}));const G=SM.ghost.map(p=>({x:p.x*W,y:p.y*H})),lw=Math.max(10,g.s*H*.2);
-  const m=state.m;LIMBS.forEach((l,i)=>{SM.limbs[i]=lerp(SM.limbs[i],m&&m.limbs[i]?1:0,.15)});
+  const T=g.P.p.map(p=>gpt(g,p));if(!SM.ghost)SM.ghost=T;SM.ghost=SM.ghost.map((p,i)=>({x:lerp(p.x,T[i].x,K(.15)),y:lerp(p.y,T[i].y,K(.15))}));const G=SM.ghost.map(p=>({x:p.x*W,y:p.y*H})),lw=Math.max(10,g.s*H*.2);
+  const m=state.m;LIMBS.forEach((l,i)=>{SM.limbs[i]=lerp(SM.limbs[i],m&&m.limbs[i]?1:0,K(.15))});
   c.lineCap='round';c.lineJoin='round';
   const col=(k)=>{const t=ready?1:k;return`rgba(${Math.round(255-181*t)},${Math.round(255-33*t)},${Math.round(255-127*t)},`};
   // torso
@@ -469,7 +481,7 @@ function render(){requestAnimationFrame(render);if(!running||!OW)return;const c=
   smoothPts(state.per&&state.per.pts);if(SM.pts){const S=SM.pts;c.strokeStyle='rgba(255,210,63,.95)';c.lineWidth=3;c.beginPath();
    for(const[a,b]of[[1,2],[1,7],[2,8],[7,8],[1,3],[3,5],[2,4],[4,6],[7,9],[9,11],[8,10],[10,12]])if(S[a]&&S[b]){c.moveTo(S[a].x*W,S[a].y*H);c.lineTo(S[b].x*W,S[b].y*H)}c.stroke();
    c.fillStyle='#ffd23f';for(const p of S)if(p){c.beginPath();c.arc(p.x*W,p.y*H,3.5,0,7);c.fill()}}}
- if(mode==='landscape'&&state.g){const g=state.g;if(g.hy!=null&&g.target){SM.hz=SM.hz==null?g.hy:lerp(SM.hz,g.hy,.2);const a=Math.tan((g.ang||0)/57.3)*W/2;
+ if(mode==='landscape'&&state.g){const g=state.g;if(g.hy!=null&&g.target){SM.hz=SM.hz==null?g.hy:lerp(SM.hz,g.hy,K(.2));const a=Math.tan((g.ang||0)/57.3)*W/2;
    c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.beginPath();c.moveTo(0,SM.hz*H-a);c.lineTo(W,SM.hz*H+a);c.stroke();
    c.setLineDash([8,6]);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2;c.beginPath();c.moveTo(0,g.target.hy*H);c.lineTo(W,g.target.hy*H);c.stroke();c.setLineDash([]);
    c.font='600 13px -apple-system,"Noto Sans TC"';c.fillStyle='rgba(255,255,255,.9)';c.fillText('地平線放這裡',10,g.target.hy*H-8)}}
@@ -478,7 +490,7 @@ function render(){requestAnimationFrame(render);if(!running||!OW)return;const c=
   c.strokeStyle=lv?'#ffd23f':'rgba(255,255,255,.9)';c.lineWidth=lv?2:1.5;
   if(lv){c.beginPath();c.moveTo(-70,0);c.lineTo(70,0);c.stroke()}
   else{c.beginPath();c.moveTo(-70,0);c.lineTo(-28,0);c.moveTo(28,0);c.lineTo(70,0);c.stroke();c.rotate(-roll/57.3);c.strokeStyle='rgba(255,210,63,.95)';c.beginPath();c.moveTo(-28,0);c.lineTo(28,0);c.stroke()}
-  c.restore();$('lvl').textContent=(lv?'水平 ':'')+Math.abs(roll).toFixed(1)+'°';$('lvl').classList.toggle('lv',lv)}}
+  c.restore();const lt=(lv?'水平 ':'')+Math.abs(roll).toFixed(1)+'°';if(lt!==render.lt){render.lt=lt;$('lvl').textContent=lt;$('lvl').classList.toggle('lv',lv)}}}
 requestAnimationFrame(render);
 
 /* ---------- camera ---------- */
@@ -561,7 +573,7 @@ start=async function(deviceId){$('cover').classList.add('gone');enableMotion();
   if(!lens.ultra&&!lens.wide)await findLenses();if(face)await setMode('VIDEO');running=true;sizeOv();applyDigital();renderZoom();setupCtl();
   if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else detectTick()}
  catch(e){$('cover').classList.remove('gone');$('coverMsg').textContent=capMode==='video'?'錄影需要相機和麥克風權限：請到「設定 → Safari」把相機、麥克風改成「允許」。':'無法開啟相機：請到「設定 → Safari → 相機」改成「允許」，再點一次。'}};
-$('cover').onclick=()=>start();
+
 $('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';onUltra=false;zoomLv=1;dz=1;SM.pts=null;if(stream)start()};
 
 /* frame used for detection: the digitally-zoomed crop, so advice matches what is on screen */
@@ -572,7 +584,7 @@ function grabFrame(){const w=vid.videoWidth,h=vid.videoHeight,cw=Math.round(w/dz
 /* =================== photo roll + viewer =================== */
 const ROLL=[];let cur=null;
 function addShot(item){ROLL.unshift(item);if(ROLL.length>30){const o=ROLL.pop();URL.revokeObjectURL(o.url)}$('thumb').style.backgroundImage=item.type==='video'?'none':`url(${item.url})`;$('thumb').classList.toggle('vid',item.type==='video')}
-$('shutter').onclick=()=>{if(!stream||!vid.videoWidth)return;
+$('shutter').onclick=()=>{if(!stream){start();return}if(!vid.videoWidth)return;
  if(capMode==='video'){rec&&rec.state==='recording'?stopRec():startRec();return}
  const c=grabFrame();stage.classList.remove('flash');void stage.offsetWidth;stage.classList.add('flash');
  const per=state.per,sub=per&&per.pts[1]&&per.pts[2]?{x:(per.pts[1].x+per.pts[2].x)/2,y:per.pts[0]?per.pts[0].y:(per.pts[1].y)}:null;
@@ -611,12 +623,19 @@ const tImg=tex(0),tMsk=tex(1);gl.uniform1i(U.img,0);gl.uniform1i(U.msk,1);
 
 const ADJ=[['ev','曝光',-2,2,.05],['con','對比',-1,1,.02],['hi','亮部',-1,1,.02],['sh','暗部',-1,1,.02],['temp','色溫',-1,1,.02],['tint','色調',-1,1,.02],['sat','飽和度',-1,1,.02],['vib','鮮豔度',-1,1,.02],['fade','褪色',0,1,.02],['vig','暗角',0,1,.02]];
 const Z0=Object.fromEntries(ADJ.map(a=>[a[0],0]));
+const LK=(o)=>({...Z0,...o});
+const LOOKS=[['none','原圖',LK({}),'#888'],['airy','通透日系',LK({ev:.25,con:-.2,sh:.45,hi:-.2,sat:-.15,temp:-.08,fade:.18}),'#cfe3f2'],['cream','奶油膚',LK({ev:.15,con:-.1,sh:.3,temp:.12,tint:.04,sat:-.08,vib:.1,fade:.1}),'#f3d9c4'],
+ ['film','電影感',LK({con:.15,hi:-.45,sh:.1,sat:-.2,temp:.08,tint:.05,vig:.45,fade:.12}),'#7a6a55'],['vivid','鮮明',LK({con:.22,vib:.5,sat:.1}),'#ff7a3d'],['warm','暖陽',LK({temp:.35,vib:.25,sh:.2,hi:-.15}),'#ffb347'],
+ ['cool','清冷',LK({temp:-.3,con:.1,sat:-.1,hi:-.1}),'#7fb3e0'],['bw','黑白',LK({sat:-1,con:.32,vig:.3}),'#ddd']];
+const lookP=id=>(LOOKS.find(l=>l[0]===id)||LOOKS[0])[2];
 const FSTOPS=[[16,0],[8,.12],[5.6,.25],[4,.38],[2.8,.55],[2,.75],[1.4,1]];
-let E={src:null,W:0,H:0,p:{...Z0},base:{...Z0},filter:'none',blurI:0,mask:false,crop:null,ratio:'orig',tool:'ev',stats:null,orig:false};
+let E={src:null,W:0,H:0,adj:{...Z0},amt:1,base:{...Z0},filter:'none',blurI:0,mask:false,crop:null,ratio:'orig',tool:'ev',stats:null,orig:false};
 function imgStats(c){const t=document.createElement('canvas'),W=96,H=Math.round(96*c.height/c.width);t.width=W;t.height=H;const x=t.getContext('2d');x.drawImage(c,0,0,W,H);const d=x.getImageData(0,0,W,H).data;let L=0,hi=0,lo=0,R=0,G=0,B=0,S=0,n=W*H;
  for(let i=0;i<d.length;i+=4){const r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255,l=.2126*r+.7152*g+.0722*b;L+=l;if(l>.96)hi++;if(l<.04)lo++;R+=r;G+=g;B+=b;const mx=Math.max(r,g,b);S+=mx?(mx-Math.min(r,g,b))/mx:0}
  return{mL:L/n,hi:hi/n,lo:lo/n,cast:(R-B)/n,green:(G-(R+B)/2)/n,sat:S/n}}
 function filters(){const s=E.stats,cl=(v,a,b)=>Math.max(a,Math.min(b,v));const a={...Z0,ev:+cl((.47-s.mL)*2.4,-1,1.2).toFixed(2),sh:s.lo>.03?.35:.1,hi:s.hi>.02?-.4:-.1,temp:+cl(-s.cast*2,-.4,.4).toFixed(2),tint:+cl(s.green*3,-.3,.3).toFixed(2),vib:.15};
+ const rec={airy:s.mL>.5?2:0,cream:state.per?1.5:0,film:s.mL<.38?2:0,vivid:s.sat<.25?2:0,warm:s.cast<0?1:0};return[LOOKS[0].slice(0,3).concat(0),['auto','自動修正',a,0],...LOOKS.slice(1).map(l=>[l[0],l[1],l[2],rec[l[0]]||0])]}
+function filtersOld(){const s=E.stats,cl=(v,a,b)=>Math.max(a,Math.min(b,v));const a={...Z0};
  const m=o=>{const r={...a};for(const k in o)r[k]=+((['ev','temp','tint'].includes(k)?a[k]:0)+o[k]).toFixed(2);return r};
  return[['none','原圖',{...Z0},0],['auto','自動修正',a,0],['airy','通透日系',m({ev:.25,con:-.2,sh:.45,hi:-.2,sat:-.15,temp:-.08,fade:.18}),s.mL>.5?2:0],['cream','奶油膚',m({ev:.15,con:-.1,sh:.3,temp:.12,tint:.04,sat:-.08,vib:.1,fade:.1}),state.per?1.5:0],
   ['film','電影感',m({con:.15,hi:-.45,sh:.1,sat:-.2,temp:.08,tint:.05,vig:.45,fade:.12}),s.mL<.38?2:0],['vivid','鮮明',m({con:.22,vib:.5,sat:.1}),s.sat<.25?2:0],['warm','暖陽',m({temp:.35,vib:.25,sh:.2,hi:-.15}),s.cast<0?1:0],
@@ -625,9 +644,10 @@ function cropRect(ratio){const W=E.W,H=E.H;if(ratio==='orig')return{x:0,y:0,w:W,
  const sub=E.subject||{x:.5,y:.4},px=sub.x*W,py=sub.y*H;let best=null,bd=1e9;for(const fx of[1/3,.5,2/3])for(const fy of[1/3,.5]){let x=Math.max(0,Math.min(W-w,px-fx*w)),y=Math.max(0,Math.min(H-h,py-fy*h));const d=Math.hypot((px-x)/w-fx,(py-y)/h-fy)+(fx===.5?.03:0);if(d<bd){bd=d;best={x,y,w,h}}}return best}
 function draw_(w,h,params){ecv.width=w;ecv.height=h;gl.viewport(0,0,w,h);const c=E.crop;gl.uniform4f(U.crop,c.x/E.W,c.y/E.H,c.w/E.W,c.h/E.H);gl.uniform1f(U.ar,E.W/E.H);
  for(const[k]of ADJ)gl.uniform1f(U[k],params[k]);gl.uniform1f(U.blur,params===Z0?0:E.blurI);gl.uniform1f(U.hasMask,E.mask?1:0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
+const PP=()=>{const o={};for(const[k]of ADJ)o[k]=E.base[k]*E.amt+E.adj[k];return o};
 let rq=0;function paint(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;const box=$('ebox').getBoundingClientRect(),c=E.crop,dpr=Math.min(2,devicePixelRatio||1),k=Math.min(box.width/c.w,box.height/c.h);const w=Math.round(c.w*k),h=Math.round(c.h*k);
- ecv.style.width=w+'px';ecv.style.height=h+'px';draw_(Math.round(w*dpr),Math.round(h*dpr),E.orig?Z0:E.p)})}
-async function openEditor(it){E.src=it.canvas;E.W=it.canvas.width;E.H=it.canvas.height;E.subject=it.subject;E.p={...Z0};E.base={...Z0};E.filter='none';E.blurI=0;E.mask=false;E.ratio='orig';E.crop=cropRect('orig');E.stats=imgStats(it.canvas);E.item=it;
+ ecv.style.width=w+'px';ecv.style.height=h+'px';draw_(Math.round(w*dpr),Math.round(h*dpr),E.orig?Z0:PP())})}
+async function openEditor(it){E.src=it.canvas;E.W=it.canvas.width;E.H=it.canvas.height;E.subject=it.subject;E.adj={...Z0};E.filter=it.look?it.look.id:'none';E.base={...lookP(E.filter)};E.amt=it.look?it.look.amt:1;E.blurI=0;E.mask=false;E.ratio='orig';E.crop=cropRect('orig');E.stats=imgStats(it.canvas);E.item=it;
  const mx=gl.getParameter(gl.MAX_TEXTURE_SIZE);let src=it.canvas;if(Math.max(E.W,E.H)>mx){const k=mx/Math.max(E.W,E.H),t=document.createElement('canvas');t.width=E.W*k|0;t.height=E.H*k|0;t.getContext('2d').drawImage(it.canvas,0,0,t.width,t.height);src=t}
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tImg);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);
  $('editor').classList.add('show');$('viewer').classList.remove('show');buildFilters();buildAdj();buildCrop();buildDepth();paint();segment(src)}
@@ -635,14 +655,16 @@ function buildFilters(){const L=filters(),top=Math.max(...L.map(f=>f[3]));const 
  $('fStrip').innerHTML=L.map(([id,n,,r])=>`<button data-f="${id}" class="${id===E.filter?'on':''}"><canvas width="128" height="128"></canvas><span>${n}${r&&r===top?' ✦':''}</span></button>`).join('');
  const save={crop:E.crop,blur:E.blurI};const s=Math.min(E.W,E.H);E.crop={x:(E.W-s)/2,y:(E.H-s)/2,w:s,h:s};const bi=E.blurI;E.blurI=0;
  $('fStrip').querySelectorAll('button').forEach((b,i)=>{draw_(128,128,L[i][2]);b.querySelector('canvas').getContext('2d').drawImage(ecv,0,0);
-  b.onclick=()=>{E.filter=L[i][0];E.base={...L[i][2]};E.p={...E.base};$('fStrip').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncAdj();paint()}});E.crop=save.crop;E.blurI=bi}
+  b.onclick=()=>{E.filter=L[i][0];E.base={...L[i][2]};if(E.filter!=='none'&&E.amt<.05)E.amt=1;$('fStrip').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncAmt();paint()}});syncAmt();E.crop=save.crop;E.blurI=bi;const sel=$('fStrip').querySelector('button.on');if(sel)requestAnimationFrame(()=>sel.scrollIntoView({inline:'center',block:'nearest'}))}
 function buildAdj(){$('aChips').innerHTML=ADJ.map(([k,n])=>`<button data-k="${k}" class="${k===E.tool?'on':''}">${n}<i></i></button>`).join('');
  $('aChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{E.tool=b.dataset.k;$('aChips').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncAdj()});syncAdj()}
-function syncAdj(){const a=ADJ.find(x=>x[0]===E.tool),s=$('aSl');s.min=a[2];s.max=a[3];s.step=a[4];s.value=E.p[E.tool];$('aV').textContent=fmtV(E.p[E.tool]);
- $('aChips').querySelectorAll('button').forEach(b=>b.classList.toggle('mod',Math.abs(E.p[b.dataset.k])>.001))}
+function syncAdj(){const a=ADJ.find(x=>x[0]===E.tool),s=$('aSl');s.min=a[2];s.max=a[3];s.step=a[4];s.value=E.adj[E.tool];$('aV').textContent=fmtV(E.adj[E.tool]);
+ $('aChips').querySelectorAll('button').forEach(b=>b.classList.toggle('mod',Math.abs(E.adj[b.dataset.k])>.001))}
+function syncAmt(){$('fAmt').value=Math.round(E.amt*100);$('fAmtV').textContent=Math.round(E.amt*100);$('fAmtRow').classList.toggle('off',E.filter==='none')}
+$('fAmt').oninput=e=>{E.amt=e.target.value/100;$('fAmtV').textContent=e.target.value;paint()};
 const fmtV=v=>(v>0?'+':'')+Math.round(v*100);
-$('aSl').oninput=e=>{E.p[E.tool]=+e.target.value;$('aV').textContent=fmtV(E.p[E.tool]);paint()};
-$('aReset').onclick=()=>{E.p={...E.base};syncAdj();paint()};
+$('aSl').oninput=e=>{E.adj[E.tool]=+e.target.value;$('aV').textContent=fmtV(E.adj[E.tool]);syncAdj();paint()};
+$('aReset').onclick=()=>{E.adj={...Z0};syncAdj();paint()};
 function buildCrop(){const R=[['orig','原始'],['45','4:5'],['11','1:1'],['916','9:16'],['34','3:4'],['169','16:9']];$('cRow').innerHTML=R.map(([k,n])=>`<button data-r="${k}" class="${k===E.ratio?'on':''}">${n}</button>`).join('');
  $('cRow').querySelectorAll('button').forEach(b=>b.onclick=()=>{E.ratio=b.dataset.r;E.crop=cropRect(E.ratio);$('cRow').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));paint()})}
 function buildDepth(){const s=$('dSl');s.min=0;s.max=FSTOPS.length-1;s.step=1;s.value=0;$('dV').textContent='f/16';
@@ -659,8 +681,8 @@ async function segment(src){$('dState').textContent='正在辨識人物…';E.ma
 document.querySelectorAll('.etab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.etab').forEach(x=>{x.classList.toggle('on',x===t);$(x.dataset.t).classList.toggle('hidden',x!==t)})});
 const eo=e=>{e.preventDefault();E.orig=true;paint()},ef=()=>{if(E.orig){E.orig=false;paint()}};ecv.addEventListener('pointerdown',eo);addEventListener('pointerup',ef);ecv.addEventListener('pointerleave',ef);
 $('eCancel').onclick=()=>$('editor').classList.remove('show');
-$('eSave').onclick=()=>{const c=E.crop,k=Math.min(1,4096/Math.max(c.w,c.h));draw_(Math.round(c.w*k),Math.round(c.h*k),E.p);
- ecv.toBlob(async b=>{const it={type:'photo',blob:b,url:URL.createObjectURL(b),canvas:(()=>{const t=document.createElement('canvas');t.width=ecv.width;t.height=ecv.height;t.getContext('2d').drawImage(ecv,0,0);return t})(),subject:E.subject};
+$('eSave').onclick=()=>{const c=E.crop,k=Math.min(1,4096/Math.max(c.w,c.h));draw_(Math.round(c.w*k),Math.round(c.h*k),PP());
+ ecv.toBlob(async b=>{const it={type:'photo',blob:b,url:URL.createObjectURL(b),canvas:(()=>{const t=document.createElement('canvas');t.width=ecv.width;t.height=ecv.height;t.getContext('2d').drawImage(ecv,0,0);return t})(),subject:E.subject,look:null};
   addShot(it);paint();$('editor').classList.remove('show');openViewer(it);saveBlob(b,`framecoach-${Date.now()}.jpg`)},'image/jpeg',.94)};
 addEventListener('resize',()=>{if($('editor').classList.contains('show'))paint()});
 
@@ -671,7 +693,46 @@ setUIMode=function(m){const was=capMode;capMode=m==='video'?'video':'photo';base
  if(on){const tr=$('modesTrack'),cx=tr.parentElement.getBoundingClientRect().width/2,bx=on.offsetLeft+on.offsetWidth/2;tr.style.transform=`translateX(${cx-bx}px)`}
  $('shutter').classList.toggle('video',capMode==='video');if(was!==capMode&&stream){if(rec&&rec.state==='recording')stopRec();start(onUltra&&lens.ultra?lens.ultra.deviceId:undefined)}};
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
 setUIMode('portrait');
+/* =================== live filter (WebGL on the camera feed) =================== */
+const lvC=$('lv'),lgl=lvC.getContext('webgl',{premultipliedAlpha:false,antialias:false,alpha:false});
+let look={id:'none',amt:1};try{const o=JSON.parse(localStorage.getItem('fc_look')||'null');if(o)look=o}catch(e){}
+const LU={};let lprog=null,ltex=null;
+if(lgl){const c=(t,src)=>{const o=lgl.createShader(t);lgl.shaderSource(o,src);lgl.compileShader(o);return o};lprog=lgl.createProgram();lgl.attachShader(lprog,c(lgl.VERTEX_SHADER,VS));lgl.attachShader(lprog,c(lgl.FRAGMENT_SHADER,FS));lgl.linkProgram(lprog);lgl.useProgram(lprog);
+ lgl.bindBuffer(lgl.ARRAY_BUFFER,lgl.createBuffer());lgl.bufferData(lgl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),lgl.STATIC_DRAW);const a=lgl.getAttribLocation(lprog,'p');lgl.enableVertexAttribArray(a);lgl.vertexAttribPointer(a,2,lgl.FLOAT,false,0,0);
+ ['img','crop','ev','con','hi','sh','temp','tint','sat','vib','fade','vig','blur','hasMask','ar'].forEach(k=>LU[k]=lgl.getUniformLocation(lprog,k));
+ ltex=lgl.createTexture();lgl.bindTexture(lgl.TEXTURE_2D,ltex);for(const[p,v]of[[lgl.TEXTURE_MIN_FILTER,lgl.LINEAR],[lgl.TEXTURE_MAG_FILTER,lgl.LINEAR],[lgl.TEXTURE_WRAP_S,lgl.CLAMP_TO_EDGE],[lgl.TEXTURE_WRAP_T,lgl.CLAMP_TO_EDGE]])lgl.texParameteri(lgl.TEXTURE_2D,p,v);
+ lgl.uniform1i(LU.img,0);lgl.uniform1f(LU.blur,0);lgl.uniform1f(LU.hasMask,0)}
+const lookParams=()=>{const b=lookP(look.id),o={};for(const[k]of ADJ)o[k]=b[k]*look.amt;return o};
+let lvW=0,lvH=0;
+function drawLive(){const on=look.id!=='none'&&running&&lgl&&vid.readyState>=2;lvC.style.opacity=on?1:0;vid.style.opacity=on?0:1;if(!on)return;
+ const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1),w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);if(w!==lvW||h!==lvH){lvC.width=lvW=w;lvC.height=lvH=h;lgl.viewport(0,0,w,h)}
+ lgl.bindTexture(lgl.TEXTURE_2D,ltex);lgl.texImage2D(lgl.TEXTURE_2D,0,lgl.RGB,lgl.RGB,lgl.UNSIGNED_BYTE,vid);
+ // emulate object-fit:cover + digital zoom + selfie mirror in texture space
+ const vw=vid.videoWidth,vh=vid.videoHeight,ba=w/h;let cw=1,ch=1;if(vw/vh>ba)cw=(vh*ba)/vw;else ch=(vw/ba)/vh;cw/=dz;ch/=dz;const x0=(1-cw)/2,y0=(1-ch)/2;
+ if(facing==='user')lgl.uniform4f(LU.crop,x0+cw,y0,-cw,ch);else lgl.uniform4f(LU.crop,x0,y0,cw,ch);lgl.uniform1f(LU.ar,vw/vh);
+ const P=lookParams();for(const[k]of ADJ)lgl.uniform1f(LU[k],P[k]);lgl.drawArrays(lgl.TRIANGLE_STRIP,0,4)}
+// apply the current look to a captured frame with the editor renderer
+function renderLook(c,params){E.W=c.width;E.H=c.height;E.crop={x:0,y:0,w:c.width,h:c.height};E.mask=false;E.blurI=0;
+ gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tImg);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,c);const k=Math.min(1,gl.getParameter(gl.MAX_TEXTURE_SIZE)/Math.max(c.width,c.height));draw_(Math.round(c.width*k),Math.round(c.height*k),params);return new Promise(r=>ecv.toBlob(r,'image/jpeg',.95))}
+// looks panel
+function buildLooks(){$('lookRow').innerHTML=LOOKS.map(([id,n,,col])=>`<button data-l="${id}" class="${id===look.id?'on':''}"><i style="background:${col}"></i>${n}</button>`).join('');
+ $('lookRow').querySelectorAll('button').forEach(b=>b.onclick=()=>{look.id=b.dataset.l;if(look.id!=='none'&&look.amt<.05)look.amt=1;saveLook();buildLooks()});
+ $('lookAmt').value=Math.round(look.amt*100);$('lookAmtV').textContent=Math.round(look.amt*100);$('lookAmtRow').classList.toggle('off',look.id==='none');$('lookBtn').classList.toggle('on',look.id!=='none')}
+const saveLook=()=>{try{localStorage.setItem('fc_look',JSON.stringify(look))}catch(e){}};
+$('lookAmt').oninput=e=>{look.amt=e.target.value/100;$('lookAmtV').textContent=e.target.value;saveLook()};
+$('lookBtn').onclick=()=>{$('looks').classList.toggle('show')};
+buildLooks();
+// capture with the look applied (original kept, so the filter stays adjustable afterwards)
+$('shutter').onclick=async()=>{if(!stream){start();return}if(!vid.videoWidth)return;
+ if(capMode==='video'){rec&&rec.state==='recording'?stopRec():startRec();return}
+ const c=grabFrame();stage.classList.remove('flash');void stage.offsetWidth;stage.classList.add('flash');
+ const per=state.per,sub=per&&per.pts[1]&&per.pts[2]?{x:(per.pts[1].x+per.pts[2].x)/2,y:per.pts[0]?per.pts[0].y:per.pts[1].y}:null;
+ const lk=look.id!=='none'?{...look}:null;const b=lk?await renderLook(c,lookParams()):await new Promise(r=>c.toBlob(r,'image/jpeg',.95));
+ addShot({type:'photo',blob:b,url:URL.createObjectURL(b),canvas:c,subject:sub,look:lk})};
+// record the filtered picture when a look is on
+const _startRec=startRec;startRec=function(){if(look.id!=='none'&&lvC.captureStream){const s0=stream;stream=new MediaStream([...lvC.captureStream(30).getVideoTracks(),...s0.getAudioTracks()]);try{_startRec()}finally{stream=s0}}else _startRec()};
 
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="構圖教練">
+<meta name="theme-color" content="#0d0d0f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>構圖教練 Live</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a pro camera's live view with a quiet coach
+   IDEA: mirrorless camera back screen — black housing, focus-confirm green, guide yellow
+   PICTURE: the live viewfinder itself, full width, with target ring, arrow and horizon guides
+   COLOUR and TYPE: black #0d0d0f, warm white, guide yellow #ffd23f, confirm green #4ade80; Inter Tight numbers, Noto Sans TC
+   LAYOUT: mode switch on top, viewfinder, shutter row, then training panel */
+:root{color-scheme:dark;--bg:#0d0d0f;--pan:#18181c;--line:#2a2a30;--ink:#f3f1ec;--dim:#9a9aa3;--acc:#ffd23f;--ok:#4ade80;--bad:#ff5a4e}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.num{font-family:"Inter Tight",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding:10px 14px 40px;display:grid;gap:14px}
+@media(min-width:900px){.wrap{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}.vf{position:sticky;top:10px}}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between;grid-column:1/-1}
+h1{font-size:18px;margin:0}h1 b{color:var(--acc)}
+.seg{display:flex;background:var(--pan);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{appearance:none;border:0;background:none;color:var(--dim);font:700 16px "Noto Sans TC";min-height:40px;padding:0 18px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--acc);color:#111}
+.stage{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;display:grid;place-items:center}
+.stage video,.stage canvas.still{max-width:100%;max-height:100%;display:block}
+#ov{position:absolute;pointer-events:none}
+.empty{text-align:center;color:var(--dim);padding:24px}
+.badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);padding:4px 12px;border-radius:20px;font-size:18px;font-weight:700}
+.status{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:20px;font-size:13px;color:var(--dim)}
+.guide{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:8px 14px;border-radius:12px;font-weight:700;font-size:16px;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row>*{flex:1}
+.btn{appearance:none;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:500 16px "Noto Sans TC";min-height:46px;padding:10px 14px;border-radius:12px;cursor:pointer;text-align:center}
+.btn.pri{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
+.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.shutter{flex:0 0 72px;height:72px;border-radius:50%;border:4px solid #fff;background:#fff3;padding:0}
+.shutter.ready{background:var(--ok);border-color:#d9ffe6}
+.panel{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{font-size:16px;margin:0 0 8px}
+.tips{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
+.tips li{padding:9px 12px;border-radius:10px;background:#222228;font-size:15px;border-left:3px solid var(--acc)}
+.tips li.bad{border-left-color:var(--bad)}.tips li.hd{background:none;border:0;padding:6px 0 0;font-weight:700;color:var(--dim);font-size:14px}.tips li b{display:block;font-weight:700}.tips li small{display:block;color:var(--dim);font-size:13px;margin-top:2px}.tips li.good{border-left-color:var(--ok)}
+.hint{color:var(--dim);font-size:13px;margin:6px 0 0}
+.train{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center}
+.train canvas{width:120px;height:160px;border-radius:8px;background:#000}
+.big{font-size:34px;font-weight:700;line-height:1}
+.prog{height:6px;background:#2a2a30;border-radius:3px;overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;width:0;background:var(--acc)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px;margin-top:8px}.kv span:nth-child(odd){color:var(--dim)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;padding:20px;z-index:9;text-align:center}
+.modal.show{display:grid}.modal img{max-width:100%;max-height:70vh;border-radius:10px}
+.rec{display:flex;align-items:center;gap:10px;margin-top:10px}.rec span{color:var(--dim);font-size:14px;white-space:nowrap}.rec select{flex:1;min-height:46px;font:500 16px 'Noto Sans TC';background:var(--pan);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:0 12px}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.steps span{background:#24242a;border-radius:20px;padding:4px 10px;font-size:13px}.credit{color:var(--dim);font-size:12px;margin-top:6px}.credit a{color:var(--dim)}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="top"><h1>構圖<b>教練</b> Live</h1>
+  <div class="seg" role="tablist"><button id="mP" class="on">人像</button><button id="mL">風景</button></div></div>
+
+ <section class="vf">
+  <div class="stage" id="stage">
+   <div class="empty" id="empty">按「開始取景」打開相機<br><small>或用「分析照片」先試試看</small></div>
+   <video id="vid" class="hidden" playsinline muted></video>
+   <canvas id="still" class="still hidden"></canvas>
+   <canvas id="ov"></canvas>
+   <div class="status" id="status">載入偵測模型中…</div>
+   <div class="badge num hidden" id="badge"></div>
+   <div class="guide hidden" id="guide"></div>
+  </div>
+  <div class="row" style="align-items:center">
+   <button class="btn pri" id="startBtn">開始取景</button>
+   <button class="shutter" id="shutter" aria-label="拍攝"></button>
+   <label class="btn">分析照片<input id="testIn" type="file" accept="image/*" capture="environment" hidden></label>
+  </div>
+  <div class="row"><button class="btn" id="levelBtn">開啟水平儀</button><button class="btn" id="flipBtn">切換前／後鏡頭</button></div>
+  <label class="rec" id="recBox"><span>拍法</span><select id="recSel"></select></label>
+  <div class="steps" id="steps"></div>
+  <p class="hint" id="note"></p>
+ </section>
+
+ <section>
+  <div class="panel">
+   <h2 id="tipT">即時建議・人像</h2>
+   <ul class="tips" id="tips"><li>開始取景後，這裡會即時更新建議。</li></ul>
+  </div>
+  <div class="panel" style="margin-top:14px">
+   <h2 id="trT">訓練：人像模型</h2>
+   <div class="train">
+    <canvas id="heat" width="120" height="160"></canvas>
+    <div><div class="big num" id="trN">0</div><div class="hint" style="margin:0">張參考照片</div>
+     <div class="kv" id="trKV"></div></div>
+   </div>
+   <div class="prog"><i id="trBar"></i></div>
+   <div class="row">
+    <label class="btn pri">加入參考照片<input id="trIn" type="file" accept="image/*" multiple hidden></label>
+    <button class="btn" id="trClr">清除此模型</button>
+   </div>
+   <p class="hint" id="trHint">選一批你覺得構圖好的人像照片（建議 20 張以上）。系統會學這些照片的眼睛高度、臉部位置和人物大小；照片越多，建議越像你要的風格。人像和風景分開訓練。</p>
+  </div>
+ </section>
+</div>
+<div class="modal" id="modal"><div><img id="outImg" alt="拍攝成品"><p>長按圖片 →「加入照片」存到相簿</p><button class="btn" id="closeM">繼續拍</button></div></div>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+const vid=$('vid'),ov=$('ov'),oc=ov.getContext('2d'),still=$('still');
+const P3=[1/3,2/3];
+let mode='portrait',stream=null,facing='environment',face=null,pose=null,running=false,tilt=null,frameSrc=null;
+
+
+const RECIPES={
+ auto:{n:'自動判斷',steps:[]},
+ legs:{n:'網美長腿（全身）',eyeY:1/3,footY:.94,steps:['手機放到腰部或膝蓋高度','鏡頭微微往上仰','用 1x 或 0.5x，腳尖貼近畫面底部','頭頂上方留一點天空']},
+ center:{n:'置中全身',eyeY:1/3,footY:.9,off:0,steps:['手機在主角胸口高度','用 1.5x 變焦','站在 4 公尺以外','主角的頭放在畫面正中線上']},
+ thirds:{n:'三分法人像',eyeY:1/3,off:1/6,steps:['手機在主角胸口高度','用 2x 變焦，站 4 公尺以外','頭放在上方三分線上']},
+ tele:{n:'半身特寫',eyeY:1/3,off:0,steps:['退到 4 公尺以外，用 3x 變焦','背景會被壓縮得很乾淨、有雜誌感','頭放在上方三分線上']},
+ env:{n:'環境人像',eyeY:1/3,off:.22,steps:['退到 8 公尺以外，用 3–4x','主角放在畫面一側','另一側留給場景說故事']}};
+let recipe='auto';try{recipe=localStorage.getItem('fc_recipe')||'auto'}catch(e){}
+/* ---------- learned models (per mode, stored on this device) ---------- */
+const KEY='fc_models_v1';
+let M={portrait:{s:[]},landscape:{s:[]}};
+try{const v=JSON.parse(localStorage.getItem(KEY));if(v&&v.portrait&&v.landscape)M=v}catch(e){}
+const saveM=()=>{try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}};
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function learned(){const s=M[mode].s;
+ if(mode==='portrait'){const d={eyeY:1/3,off:1/6,size:.18,footY:.93,n:s.length};const fs=s.filter(o=>o.footY!=null);if(fs.length>=3)d.footY=mean(fs.map(o=>o.footY));if(s.length>=3){d.eyeY=mean(s.map(o=>o.eyeY));d.off=mean(s.map(o=>Math.abs(o.x-.5)));d.size=mean(s.map(o=>o.size))}const R=RECIPES[recipe];if(R&&recipe!=='auto'){for(const k of ['eyeY','footY','off'])if(R[k]!=null)d[k]=R[k]}return d}
+ const d={low:2/3,high:1/3,pLow:.5,sx:1/3,n:s.length};if(s.length>=3){const hs=s.map(o=>o.hy).filter(v=>v!=null),lo=hs.filter(v=>v>=.5),hi=hs.filter(v=>v<.5);if(lo.length)d.low=mean(lo);if(hi.length)d.high=mean(hi);d.pLow=hs.length?lo.length/hs.length:.5;const xs=s.map(o=>Math.abs(o.sx-.5));d.sx=.5-mean(xs)}return d}
+
+/* ---------- detectors: MediaPipe when reachable, otherwise built-in heuristics ---------- */
+let mpOK=false;
+(async()=>{try{const V=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
+ const fs=await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+ face=await V.FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numFaces:3});
+ pose=await V.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',delegate:'GPU'},runningMode:'VIDEO',numPoses:1});
+ mpOK=true;$('status').textContent='AI 人臉＋骨架偵測：已啟用'}
+ catch(e){$('status').textContent='簡易偵測模式（膚色＋對比）';$('note').textContent='這個環境載不到 AI 偵測模型，目前用簡易偵測。放到自己的網址開啟，就會自動啟用人臉＋骨架偵測。'}})();
+let ts=0;const nextTs=()=>(ts=Math.max(ts+1,performance.now()));
+async function setMode(m){if(face){await face.setOptions({runningMode:m});await pose.setOptions({runningMode:m})}}
+
+function lumGrid(src,W){const H=Math.round(W*(src.videoHeight||src.height)/(src.videoWidth||src.width)),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,W,H);return{W,H,d:x.getImageData(0,0,W,H).data}}
+const L=(d,i)=>(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
+
+/* face via MediaPipe or skin heuristic */
+function detectPeople(src,isImage){const g=lumGrid(src,160);let f=null,kp=null;
+ if(mpOK){try{const r=isImage?face.detect(src):face.detectForVideo(src,nextTs());if(r.faceLandmarks.length){let best=null,ba=0;for(const lm of r.faceLandmarks){let x0=1,x1=0,y0=1,y1=0;for(const p of lm){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}const a=(x1-x0)*(y1-y0);if(a>ba){ba=a;best={lm,x0,x1,y0,y1}}}
+   const lm=best.lm,le=lm[33],re=lm[263],no=lm[1],em={x:(le.x+re.x)/2,y:(le.y+re.y)/2},ed=Math.hypot(re.x-le.x,re.y-le.y)||.01;
+   f={cx:(best.x0+best.x1)/2,cy:(best.y0+best.y1)/2,eyeY:em.y,top:best.y0-(best.y1-best.y0)*.25,h:best.y1-best.y0,x0:best.x0,x1:best.x1,yaw:(no.x-em.x)/ed,roll:Math.atan2(re.y-le.y,re.x-le.x)*57.3,n:r.faceLandmarks.length}}
+  const pr=isImage?pose.detect(src):pose.detectForVideo(src,nextTs());if(pr.landmarks.length)kp=pr.landmarks[0]}catch(e){}}
+ if(!f&&!mpOK){const{W,H,d}=g,pts=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4,Y=.299*d[i]+.587*d[i+1]+.114*d[i+2],cb=128-.1687*d[i]-.3313*d[i+1]+.5*d[i+2],cr=128+.5*d[i]-.4187*d[i+1]-.0813*d[i+2];if(Y>45&&cb>77&&cb<127&&cr>138&&cr<173)pts.push([x,y])}
+  if(pts.length>W*H*.01){const cell={};for(const[x,y]of pts){const k=(x>>3)+','+(y>>3);(cell[k]=cell[k]||[]).push([x,y])}let best=null,bv=0;for(const k in cell){const[a,b]=k.split(',').map(Number);let v=0,q=[];for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++){const c=cell[(a+i)+','+(b+j)];if(c){v+=c.length;q=q.concat(c)}}if(v>bv){bv=v;best=q}}
+   let x0=W,x1=0,y0=H,y1=0;for(const[x,y]of best){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}const h=Math.min(y1-y0,(x1-x0)*1.4);
+   f={cx:(x0+x1)/2/W,cy:(y0+h/2)/H,eyeY:(y0+h*.42)/H,top:(y0-h*.2)/H,h:h/H,x0:x0/W,x1:x1/W,yaw:0,roll:0,n:1}}}
+ // lighting on face
+ let light=null;{const{W,H,d}=g;let all=0;for(let i=0;i<d.length;i+=4)all+=L(d,i);all/=W*H;
+  if(f){let l=0,r=0,nl=0,nr=0;const ya=Math.max(0,f.cy-f.h/2)*H|0,yb=Math.min(H-1,(f.cy+f.h/2)*H)|0,xa=Math.max(0,f.x0*W)|0,xb=Math.min(W-1,f.x1*W)|0,xm=(xa+xb)/2;for(let y=ya;y<=yb;y++)for(let x=xa;x<=xb;x++){const v=L(d,(y*W+x)*4);if(x<xm){l+=v;nl++}else{r+=v;nr++}}l/=nl||1;r/=nr||1;light={face:(l+r)/2,lr:r-l,bg:all}}
+  else light={face:all,lr:0,bg:all}}
+ const ar=(src.videoWidth||src.width)/(src.videoHeight||src.height);return{f,kp,light,aspect:ar}}
+
+/* landscape: horizon line + tilt + salient point */
+function detectScene(src){const{W,H,d}=lumGrid(src,160),lum=new Float32Array(W*H);let all=0,hi=0;for(let i=0;i<W*H;i++){lum[i]=L(d,i*4);all+=lum[i];if(lum[i]>.97)hi++}all/=W*H;
+ const ys=[],xs=[];for(let x=4;x<W-4;x+=4){let by=-1,bv=0;for(let y=Math.floor(H*.12);y<H*.88;y++){let v=0;for(let k=-1;k<=1;k++)v+=lum[(y-2)*W+x+k]+lum[(y-1)*W+x+k]-lum[(y+1)*W+x+k]-lum[(y+2)*W+x+k];if(v>bv){bv=v;by=y}}if(bv>.35){xs.push(x);ys.push(by)}}
+ let hy=null,ang=0;if(xs.length>W/10){// robust line fit: drop outliers vs median
+  const med=[...ys].sort((a,b)=>a-b)[ys.length>>1],kx=[],ky=[];xs.forEach((x,i)=>{if(Math.abs(ys[i]-med)<H*.12){kx.push(x);ky.push(ys[i])}});
+  if(kx.length>xs.length*.5){const mx=mean(kx),my=mean(ky);let sxy=0,sxx=0;kx.forEach((x,i)=>{sxy+=(x-mx)*(ky[i]-my);sxx+=(x-mx)**2});const sl=sxx?sxy/sxx:0;ang=Math.atan(sl)*57.3;hy=(my+sl*(W/2-mx))/H}}
+ // sky texture above horizon
+ let skyTex=0,skyL=0;if(hy){const yb=Math.max(2,hy*H-3)|0;let n=0,m=0;for(let y=1;y<yb;y++)for(let x=1;x<W-1;x++){skyTex+=Math.abs(lum[y*W+x]-lum[y*W+x-1])+Math.abs(lum[y*W+x]-lum[(y-1)*W+x]);m+=lum[y*W+x];n++}skyTex/=n||1;skyL=m/(n||1)}
+ // salient point: local contrast weighted, ignoring the top band
+ let wx=0,wy=0,ws=0;for(let y=2;y<H-2;y++)for(let x=2;x<W-2;x++){const v=Math.abs(lum[y*W+x]-all),c=Math.abs(lum[y*W+x+2]-lum[y*W+x-2])+Math.abs(lum[(y+2)*W+x]-lum[(y-2)*W+x]),w=(v*c)**2;wx+=x*w;wy+=y*w;ws+=w}
+ return{hy,ang,skyTex,skyL,all,hi:hi/(W*H),sx:ws?wx/ws/W:.5,sy:ws?wy/ws/H:.5}}
+
+/* ---------- guidance ---------- */
+/*PURE*/
+const THR={"feetCut": 0.95, "kneeLo": 0.95, "hipLo": 0.88, "headCut": -0.02, "footTol": 0.1, "tooSmall": 0.35, "legLow": 1, "legHigh": 2.6, "eyeLowTol": 0.1, "eyeHighTol": 0.14, "posTol": 0.13, "square": 0.69, "kneeStraight": 170, "elbowStraight": 148, "legNice": 1.45, "yaw": 0.35, "roll": 12};
+const ANG={"hi": {"w": [-5.4334, -1.0141, -4.164], "b": 0.983, "t": 0.3, "soft": -1.832}, "lo": {"w": [3.4129, 1.4149, 1.9116], "b": -4.3106, "t": 2.2}};/*ANG*/ /*THR — tuned on 19,945 COCO real-photo skeletons, see train/*/
+const vis=(kp,i)=>kp&&kp[i]&&kp[i].visibility>.5&&kp[i].y>-.02&&kp[i].y<1.02&&kp[i].x>-.02&&kp[i].x<1.02;
+const ang3=(a,b,c)=>{const v1=[a.x-b.x,a.y-b.y],v2=[c.x-b.x,c.y-b.y];return Math.acos(Math.max(-1,Math.min(1,(v1[0]*v2[0]+v1[1]*v2[1])/(Math.hypot(...v1)*Math.hypot(...v2)||1))))*57.3};
+// returns a list of concrete actions {k,who,act,why,p}; p = priority (higher first)
+function advisePortrait(r,lm){const out=[],add=(k,who,act,why,p)=>out.push({k,who,act,why,p});const{f,kp,light}=r;
+ if(!f&&!kp){add('none','cam','把主角放進畫面','還找不到人，請讓主角的臉朝向鏡頭',99);return{list:out,shot:null}}
+ const has=i=>vis(kp,i);let shot='close';
+ if(kp){if(has(27)||has(28))shot='full';else if(has(25)||has(26))shot='knee';else if(has(23)||has(24))shot='half'}
+ else if(f&&f.h<.12)shot='full';else if(f&&f.h<.22)shot='half';
+ const avgY=(a,b)=>has(a)&&has(b)?(kp[a].y+kp[b].y)/2:has(a)?kp[a].y:has(b)?kp[b].y:null;
+ const headTop=f?f.top:(kp&&has(0)&&has(11)?kp[0].y-(avgY(11,12)-kp[0].y)*1.1:null);
+ // --- crops at joints
+ if(kp){const foot=Math.max(...[27,28,31,32].map(i=>kp[i]&&kp[i].visibility>.3?kp[i].y:-1));
+  if([27,28].some(i=>kp[i]&&kp[i].visibility>.2&&kp[i].y>THR.feetCut&&kp[i].y<1.1))add('feetcut','cam','腳尖被切到了：鏡頭往下壓一點','「腳貼地」：腳尖要完整，貼近畫面底部',90);
+  else if(shot==='knee'){const kn=avgY(25,26);if(kn>THR.kneeLo)add('kneecut','cam','底邊剛好切在膝蓋：往下壓拍全身，或往上抬切在大腿中段','切在關節上，看起來像被截肢',88)}
+  else if(shot==='half'&&[25,26].some(i=>kp[i]&&kp[i].visibility>.2&&kp[i].y>THR.kneeLo&&kp[i].y<1.12))add('kneecut','cam','底邊剛好切在膝蓋：往下壓拍全身，或往上抬切在大腿中段','切在關節上，看起來像被截肢',88);
+  if(!out.some(i=>i.k==='kneecut')&&!(has(25)||has(26))&&[23,24].some(i=>kp[i]&&kp[i].visibility>.2&&kp[i].y>THR.hipLo&&kp[i].y<1.06))add('hipcut','cam','底邊切在胯部：改切在腰上方或大腿中段','切在胯部，比例會變短',80);
+  for(const[i,n]of[[15,'手腕'],[16,'手腕'],[13,'手肘'],[14,'手肘']])if(has(i)&&(kp[i].x<.02||kp[i].x>.98)){add('armcut','cam',`畫面側邊切到${n}：鏡頭往${kp[i].x<.5?'左':'右'}移或退後一步`,'手被切掉一截，畫面會不完整',70);break}}
+ if(headTop!=null&&headTop<THR.headCut)add('headcut','cam','頭頂被切到：鏡頭往上抬一點','頭頂要留一點空間才不壓迫',85);
+ // --- full body recipe: 腳貼地、天留空 + low angle
+ if(shot==='full'&&kp){const foot=Math.max(...[27,28].map(i=>has(i)?kp[i].y:-1));
+  if(foot>0&&foot<lm.footY-THR.footTol)add('feetlow','cam','腳下空太多：手機往下壓，讓腳尖貼近畫面底部','「腳貼地、天留空」：腳靠近底邊，腿會看起來比較長',75);
+  if(headTop!=null&&headTop>THR.tooSmall)add('toosmall','cam','人太小：往前走 1–2 步','主角太小的話，照片看不出重點',60);
+  const sh=avgY(11,12),hp=avgY(23,24);if(sh!=null&&hp!=null&&foot>0){const ratio=(foot-hp)/Math.max(.01,hp-sh);
+   const ey=has(2)&&has(5)?(kp[2].y+kp[5].y)/2:null,an=avgY(27,28),kn=avgY(25,26);
+   if(ey!=null&&kn!=null&&an!=null){// camera-angle model: logistic regression on 3 body proportions (trained on COCO skeletons)
+    const Lg=Math.log,x=[Lg(Math.max(.05,ratio)),Lg(Math.max(.05,(foot-hp)/Math.max(.01,sh-ey))),Lg(Math.max(.05,(an-kn)/Math.max(.01,kn-hp)))],S=m=>x.reduce((a,v,j)=>a+v*m.w[j],m.b),hi=S(ANG.hi),lo=S(ANG.lo);
+    if(hi>ANG.hi.t)add('lowangle','cam','腿被拍短了：手機放低到腰部高度，鏡頭微微往上仰','現在像是從上往下拍，下半身會被壓縮；低角度往上拍可以拉長腿',78);
+    else if(lo>ANG.lo.t)add('toolow','cam','仰角可能太大：如果臉或下巴看起來變大，手機稍微抬高','低角度能拉長腿，但太低會讓臉變大；這點要你自己看畫面判斷',32);
+    else if(hi>ANG.hi.soft)add('longer','cam','想讓腿更長：手機再放低到膝蓋高度，鏡頭微微往上','網美長腿照的拍法；目前是平視，沒有錯，只是還能更好',30)}
+   else if(ratio<THR.legLow)add('lowangle','cam','腿被拍短了：手機放低到腰部高度，鏡頭微微往上仰','現在像是從上往下拍，下半身會被壓縮；低角度往上拍可以拉長腿',78);
+   else if(ratio<THR.legNice)add('longer','cam','想讓腿更長：手機再放低到膝蓋高度，鏡頭微微往上','網美長腿照的拍法；目前是平視，沒有錯，只是還能更好',30);
+   else if(ratio>THR.legHigh)add('toolow','cam','仰角太大：手機稍微抬高一點','角度太低，臉和下巴會變大',55)}}
+ // --- position: eyes on the upper third for half/close shots
+ if(f&&shot!=='full'){const off=lm.off>0?lm.off:1/6,side=Math.abs(f.yaw)>THR.yaw;
+  // centred and thirds are both valid; only a side-facing subject needs lead room
+  const cands=side?[f.yaw>0?.5-off:.5+off]:lm.off===0?[.5]:lm.off>=.2?[.5-off,.5+off]:[.5,.5-off,.5+off];const tx=cands.reduce((a,b)=>Math.abs(f.cx-b)<Math.abs(f.cx-a)?b:a);
+  const dx=f.cx-tx,dy=f.eyeY-lm.eyeY;
+  if(dy>THR.eyeLowTol||dy<-THR.eyeHighTol)add('eyey','cam',dy>0?'眼睛太低：手機往下壓一點':'眼睛太高：手機往上抬一點',`眼睛放在畫面約 ${Math.round(lm.eyeY*100)}% 的高度最好看`,65);
+  if(Math.abs(dx)>THR.posTol)add('posx','cam',dx>0?'鏡頭往右移':'鏡頭往左移',Math.abs(f.yaw)>.18?`主角臉朝${f.yaw>0?'右':'左'}，臉朝的那一側要多留空間`:'把主角放到三分線上',62)}
+ if(f&&shot==='close'&&f.h>.55)add('tooclose','cam','太近了：退後半步','距離太近，手機廣角會讓臉變形',58);
+ // --- pose (model side), needs skeleton
+ if(kp&&has(11)&&has(12)&&has(23)&&has(24)){const sw=Math.abs(kp[11].x-kp[12].x)*(r.aspect||.75),th=Math.abs(avgY(23,24)-avgY(11,12));const zs=Math.abs((kp[11].z||0)-(kp[12].z||0));
+  if(th>0&&sw/th>THR.square&&zs<.15)add('square','model','身體轉 45° 側身，肩膀再轉回來面向鏡頭','正面站直會顯寬，側身能拉出線條、顯瘦',50);
+  if(shot==='full'&&has(25)&&has(26)&&has(27)&&has(28)){const a1=ang3(kp[23],kp[25],kp[27]),a2=ang3(kp[24],kp[26],kp[28]);if(a1>THR.kneeStraight&&a2>THR.kneeStraight)add('legs','model','重心放到後腳，前腳膝蓋微彎、腳尖點地','雙腿打直很僵硬；前腳微彎會顯得自然，腿也更修長',48)}
+  if(has(13)&&has(14)&&has(15)&&has(16)){const e1=ang3(kp[11],kp[13],kp[15]),e2=ang3(kp[12],kp[14],kp[16]);const hang=e1>THR.elbowStraight&&e2>THR.elbowStraight&&kp[15].y>kp[13].y&&kp[16].y>kp[14].y&&Math.abs(kp[15].y-avgY(23,24))<th*.35&&Math.abs(kp[16].y-avgY(23,24))<th*.35;
+   if(hang)add('arms','model','手不要垂著：撩頭髮、拿包包、手插口袋，或輕拉衣角','雙手垂著會很像證件照，手有事做就自然多了',46)}}
+ if(f&&Math.abs(f.roll)>THR.roll)add('roll','model',`頭歪了約 ${Math.abs(f.roll).toFixed(0)}°：除非是刻意的，不然請擺正`,'微歪很可愛，但太歪看起來像沒站好',40);
+ if(f&&kp===null&&shot!=='close')add('posehint','model','試試側身 45°、手拿東西或邊走邊拍','網美照很少正面站著不動',20);
+ // --- light
+ if(light){if(light.bg-light.face>.18)add('backlit','cam','逆光：長按畫面上的臉，鎖定曝光（AE/AF 鎖定），再把亮度往上拉','背景太亮，臉會變暗；鎖定臉部曝光可以拍出背景發光的夢幻感',83);
+  else if(light.face<.28)add('dark','model','臉太暗：轉身面向光源（窗戶、開闊的天空）','臉要亮，整張照片才會有精神',72);
+  else if(Math.abs(light.lr)>.14)add('side','model',`光從${light.lr>0?'右':'左'}邊來，臉往光的方向轉一點`,'讓光照亮整張臉，同時保留一點立體陰影',35)}
+ out.sort((a,b)=>b.p-a.p);return{list:out,shot}}
+
+function adviseLand(s,lm,tilt){const out=[],add=(k,who,act,why,p)=>out.push({k,who,act,why,p});const tl=tilt!=null?tilt:s.ang;let th=null;
+ if(Math.abs(tl)>1.2)add('tilt','cam',`畫面歪了 ${Math.abs(tl).toFixed(1)}°：手機往${tl>0?'左':'右'}轉正`,'地平線歪掉，是風景照最明顯的扣分點',90);
+ if(s.hy!=null){const interesting=s.skyTex>.035;th=lm.n>=3?(interesting?lm.high:(lm.pLow>.5?lm.low:lm.high)):(interesting?1/3:2/3);const d=s.hy-th;
+  if(Math.abs(s.hy-.5)<.06)add('mid','cam',interesting?'地平線在正中間：手機往上抬，拍多一點天空':'地平線在正中間：手機往下壓，拍多一點地面','地平線在正中間，畫面會被切成兩半，比較呆板',80);
+  else if(Math.abs(d)>.07)add('hz','cam',d>0?'手機往下壓，讓地平線往上移':'手機往上抬，讓地平線往下移',interesting?'天空有雲彩，值得多拍':'天空單調，多拍地景比較有內容',70)}
+ const tx=s.sx<.5?lm.sx:1-lm.sx;if(Math.abs(s.sx-tx)>.1)add('sub','cam',s.sx>tx?'鏡頭往右移一點':'鏡頭往左移一點','把畫面中最亮眼的主體放到三分線上',50);
+ if(s.hi>.06)add('sky','cam','天空過曝：點一下天空，再把亮度往下拉','天空沒有細節，就拍不出藍天白雲',75);
+ if(s.all<.22)add('dark','cam','畫面太暗：手機拿穩，或靠在東西上用夜間模式','太暗容易手震模糊',60);
+ out.sort((a,b)=>b.p-a.p);return{list:out,th}}
+/*ENDPURE*/
+
+// stabilise: an item must appear in 3 consecutive frames before it shows, so tips don't flicker
+const seen={};function stable(list,live){if(!live)return list;const now=new Set(list.map(i=>i.k));for(const k in seen)if(!now.has(k))delete seen[k];for(const i of list)seen[i.k]=(seen[i.k]||0)+1;return list.filter(i=>seen[i.k]>=3)}
+const SHOT={full:'全身照',knee:'七分身',half:'半身照',close:'特寫'};
+function guidePortrait(r,live){const lm=learned(),a=advisePortrait(r,lm),list=stable(a.list,live),f=r.f;let target=null,cur=null;
+ if(f&&a.shot!=='full'){const off=Math.max(lm.off,1/6),c=Math.abs(f.yaw)>THR.yaw?[f.yaw>0?.5-off:.5+off]:[.5,.5-off,.5+off],tx=c.reduce((p,q)=>Math.abs(f.cx-q)<Math.abs(f.cx-p)?q:p);target={x:tx,y:lm.eyeY};cur={x:f.cx,y:f.eyeY}}
+ const cam=list.filter(i=>i.who==='cam'),ready=!list.some(i=>i.p>=45);
+ return{list,ready,shot:a.shot,msg:ready?'✓ 可以拍了':(list[0]?list[0].act.split('：')[0]:'微調中…'),target,cur}}
+function guideLand(s,live){const lm=learned(),a=adviseLand(s,lm,tilt),list=stable(a.list,live),ready=!list.some(i=>i.p>=45);
+ return{list,ready,msg:ready?'✓ 可以拍了':list[0].act.split('：')[0],target:a.th!=null?{hy:a.th}:null,sal:{x:s.sx,y:s.sy},hy:s.hy,ang:s.ang}}
+
+/* ---------- drawing ---------- */
+function fit(el){const r=el.getBoundingClientRect(),st=$('stage').getBoundingClientRect(),dpr=devicePixelRatio||1;Object.assign(ov.style,{left:r.left-st.left+'px',top:r.top-st.top+'px',width:r.width+'px',height:r.height+'px'});ov.width=r.width*dpr;ov.height=r.height*dpr;oc.setTransform(dpr,0,0,dpr,0,0);return[r.width,r.height]}
+function draw(el,g,mirror){const[W,H]=fit(el);oc.clearRect(0,0,W,H);const X=x=>(mirror?1-x:x)*W;
+ oc.strokeStyle='rgba(255,255,255,.3)';oc.lineWidth=1;oc.beginPath();for(const p of P3){oc.moveTo(W*p,0);oc.lineTo(W*p,H);oc.moveTo(0,H*p);oc.lineTo(W,H*p)}oc.stroke();
+ const good=g.ready,col=good?'#4ade80':'#ffd23f';
+ if(mode==='portrait'&&g.cur){oc.setLineDash([6,6]);oc.strokeStyle='rgba(74,222,128,.9)';oc.lineWidth=2;oc.beginPath();oc.arc(X(g.target.x),g.target.y*H,22,0,7);oc.stroke();oc.setLineDash([]);
+  oc.strokeStyle=col;oc.lineWidth=3;oc.beginPath();oc.arc(X(g.cur.x),g.cur.y*H,14,0,7);oc.stroke();if(!good){arrowLine(X(g.cur.x),g.cur.y*H,X(g.target.x),g.target.y*H,col)}}
+ if(mode==='landscape'){if(g.hy!=null&&g.target){const a=Math.tan((g.ang||0)/57.3)*W/2;oc.strokeStyle=col;oc.lineWidth=3;oc.beginPath();oc.moveTo(0,g.hy*H-a);oc.lineTo(W,g.hy*H+a);oc.stroke();oc.setLineDash([8,6]);oc.strokeStyle='rgba(74,222,128,.9)';oc.lineWidth=2;oc.beginPath();oc.moveTo(0,g.target.hy*H);oc.lineTo(W,g.target.hy*H);oc.stroke();oc.setLineDash([])}
+  if(g.sal){oc.strokeStyle='rgba(255,255,255,.8)';oc.lineWidth=2;oc.beginPath();oc.arc(X(g.sal.x),g.sal.y*H,10,0,7);oc.stroke()}
+  if(tilt!=null){oc.strokeStyle=Math.abs(tilt)<1.2?'#4ade80':'#ff5a4e';oc.lineWidth=2;oc.save();oc.translate(W/2,H/2);oc.rotate(-tilt/57.3);oc.beginPath();oc.moveTo(-60,0);oc.lineTo(-20,0);oc.moveTo(20,0);oc.lineTo(60,0);oc.stroke();oc.restore()}}}
+function arrowLine(x1,y1,x2,y2,c){const a=Math.atan2(y2-y1,x2-x1),d=Math.hypot(x2-x1,y2-y1);if(d<26)return;const sx=x1+Math.cos(a)*18,sy=y1+Math.sin(a)*18,ex=x2-Math.cos(a)*24,ey=y2-Math.sin(a)*24;oc.strokeStyle=c;oc.lineWidth=3;oc.beginPath();oc.moveTo(sx,sy);oc.lineTo(ex,ey);oc.lineTo(ex-12*Math.cos(a-.5),ey-12*Math.sin(a-.5));oc.moveTo(ex,ey);oc.lineTo(ex-12*Math.cos(a+.5),ey-12*Math.sin(a+.5));oc.stroke()}
+function show(g){$('badge').classList.remove('hidden');$('badge').textContent=g.ready?'可以拍':(g.shot?SHOT[g.shot]+' · ':'')+'還有 '+g.list.filter(i=>i.p>=45).length+' 項';$('badge').style.color=g.ready?'#4ade80':'#fff';$('badge').style.fontSize='15px';
+ $('guide').classList.remove('hidden');$('guide').textContent=g.msg;$('guide').style.color=g.ready?'#4ade80':'#fff';$('shutter').classList.toggle('ready',g.ready);
+ const sec=(who,t)=>{const l=g.list.filter(i=>i.who===who);return l.length?`<li class="hd">${t}</li>`+l.slice(0,4).map(i=>`<li class="${i.p>=45?'bad':''}"><b>${i.act}</b><small>${i.why}</small></li>`).join(''):''};
+ $('tips').innerHTML=(g.ready?'<li class="good"><b>構圖和姿勢都到位了，直接拍吧</b><small>建議連拍幾張，挑表情最自然的那一張</small></li>':'')+sec('cam','📷 拍照的人')+sec('model','🧍 被拍的人')}
+
+/* ---------- live loop ---------- */
+let lastRun=0;function loop(t){if(!running)return;if(vid.readyState>=2&&t-lastRun>120){lastRun=t;try{const g=mode==='portrait'?guidePortrait(detectPeople(vid,false),true):guideLand(detectScene(vid),true);show(g);draw(vid,g,facing==='user')}catch(e){console.log(e)}}requestAnimationFrame(loop)}
+async function start(){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1920},height:{ideal:1440}},audio:false});vid.srcObject=stream;vid.style.transform=facing==='user'?'scaleX(-1)':'';await vid.play();
+ if(face)await setMode('VIDEO');$('empty').classList.add('hidden');still.classList.add('hidden');vid.classList.remove('hidden');$('startBtn').textContent='停止取景';running=true;requestAnimationFrame(loop)}
+ catch(e){$('note').textContent='無法開啟即時相機：這個檢視環境擋掉了相機權限。請把 HTML 檔放到自己的網址（https），再用 iPhone Safari 開啟並允許相機；現在可以先用「分析照片」。'}}
+function stop(){running=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('startBtn').textContent='開始取景'}
+$('startBtn').onclick=()=>stream?stop():start();
+$('flipBtn').onclick=()=>{facing=facing==='environment'?'user':'environment';if(stream)start()};
+$('shutter').onclick=()=>{let c;if(stream&&vid.videoWidth){c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;const x=c.getContext('2d');if(facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(vid,0,0)}else if(!still.classList.contains('hidden'))c=still;if(!c)return;c.toBlob(b=>{$('outImg').src=URL.createObjectURL(b);$('modal').classList.add('show')},'image/jpeg',.93)};
+$('closeM').onclick=()=>$('modal').classList.remove('show');
+
+/* level (iOS needs permission; only works when hosted) */
+$('levelBtn').onclick=async()=>{try{if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){const p=await DeviceOrientationEvent.requestPermission();if(p!=='granted')throw 0}
+ addEventListener('deviceorientation',e=>{if(e.gamma==null)return;const portraitUI=innerHeight>innerWidth;tilt=portraitUI?e.gamma:e.beta;if(Math.abs(tilt)>45)tilt=null});$('levelBtn').textContent='水平儀已開啟'}catch(e){$('note').textContent='水平儀需要在自己的網址開啟才能用，目前改用畫面中的地平線判斷傾斜。'}};
+
+/* still image analysis */
+async function loadImg(file){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)})}
+$('testIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();const img=await loadImg(f),k=Math.min(1,1600/Math.max(img.width,img.height));still.width=img.width*k;still.height=img.height*k;still.getContext('2d').drawImage(img,0,0,still.width,still.height);
+ $('empty').classList.add('hidden');vid.classList.add('hidden');still.classList.remove('hidden');if(face)await setMode('IMAGE');
+ const g=mode==='portrait'?guidePortrait(detectPeople(still,true)):guideLand(detectScene(still));show(g);draw(still,g,false);frameSrc=still};
+
+/* ---------- training ---------- */
+$('trIn').onchange=async e=>{const files=[...e.target.files];if(!files.length)return;const wasRun=running;running=false;if(face)await setMode('IMAGE');let ok=0;
+ for(let i=0;i<files.length;i++){$('trBar').style.width=((i+1)/files.length*100)+'%';$('trHint').textContent=`分析中 ${i+1}/${files.length}…`;try{const img=await loadImg(files[i]),c=document.createElement('canvas'),k=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+   if(mode==='portrait'){const r=detectPeople(c,true);if(r.f){const ft=r.kp&&r.kp[27]&&r.kp[27].visibility>.5?+Math.max(r.kp[27].y,r.kp[28]?r.kp[28].y:0).toFixed(3):null;M.portrait.s.push({x:+r.f.cx.toFixed(3),eyeY:+r.f.eyeY.toFixed(3),size:+r.f.h.toFixed(3),footY:ft});ok++}}
+   else{const s=detectScene(c);M.landscape.s.push({hy:s.hy==null?null:+s.hy.toFixed(3),sx:+s.sx.toFixed(3),sy:+s.sy.toFixed(3)});ok++}
+   URL.revokeObjectURL(img.src)}catch(err){}await new Promise(r=>setTimeout(r,0))}
+ M[mode].s=M[mode].s.slice(-500);saveM();$('trHint').textContent=`完成：${files.length} 張中有 ${ok} 張可以使用${mode==='portrait'&&ok<files.length?'（其餘找不到人臉）':''}。即時建議已更新成你的風格。`;
+ if(face&&wasRun)await setMode('VIDEO');running=wasRun;if(wasRun)requestAnimationFrame(loop);renderTrain()};
+$('trClr').onclick=()=>{M[mode].s=[];saveM();renderTrain();$('trBar').style.width='0'};
+function renderTrain(){const s=M[mode].s,lm=learned(),h=$('heat'),x=h.getContext('2d');$('trN').textContent=s.length;$('trT').textContent='訓練：'+(mode==='portrait'?'人像模型':'風景模型');
+ x.fillStyle='#000';x.fillRect(0,0,120,160);x.strokeStyle='rgba(255,255,255,.25)';x.beginPath();for(const p of P3){x.moveTo(120*p,0);x.lineTo(120*p,160);x.moveTo(0,160*p);x.lineTo(120,160*p)}x.stroke();
+ if(mode==='portrait'){x.fillStyle='rgba(255,210,63,.35)';for(const o of s){x.beginPath();x.arc(o.x*120,o.eyeY*160,4,0,7);x.fill()}x.strokeStyle='#4ade80';x.beginPath();x.moveTo(0,lm.eyeY*160);x.lineTo(120,lm.eyeY*160);x.stroke();
+  $('trKV').innerHTML=`<span>眼睛高度</span><span class="num">${Math.round(lm.eyeY*100)}%</span><span>離中心</span><span class="num">${Math.round(lm.off*100)}%</span><span>臉部大小</span><span class="num">${Math.round(lm.size*100)}%</span><span>全身腳位</span><span class="num">${Math.round(lm.footY*100)}%</span><span>來源</span><span>${s.length>=3?'你的訓練照片':'內建網美拍法'}</span>`;
+  $('trHint').textContent=s.length?$('trHint').textContent:'選一批你覺得構圖好的人像照片（建議 20 張以上）。系統會學這些照片的眼睛高度、臉部位置和人物大小；照片越多，建議越像你要的風格。'}
+ else{x.strokeStyle='rgba(255,210,63,.4)';for(const o of s)if(o.hy!=null){x.beginPath();x.moveTo(0,o.hy*160);x.lineTo(120,o.hy*160);x.stroke()}x.fillStyle='rgba(255,255,255,.5)';for(const o of s){x.beginPath();x.arc(o.sx*120,o.sy*160,2.5,0,7);x.fill()}
+  $('trKV').innerHTML=`<span>低地平線</span><span class="num">${Math.round(lm.low*100)}%</span><span>高地平線</span><span class="num">${Math.round(lm.high*100)}%</span><span>偏好低線</span><span class="num">${Math.round(lm.pLow*100)}%</span><span>來源</span><span>${s.length>=3?'你的訓練照片':'內建三分法規則'}</span>`;
+  if(!s.length)$('trHint').textContent='選一批你喜歡的風景照片。系統會學地平線放多高、主體放在哪裡。和人像模型分開訓練。'}}
+
+/* mode switch */
+function setUIMode(m){mode=m;$('mP').classList.toggle('on',m==='portrait');$('mL').classList.toggle('on',m==='landscape');$('tipT').textContent='即時建議・'+(m==='portrait'?'人像':'風景');$('recBox').classList.toggle('hidden',m!=='portrait');$('steps').classList.toggle('hidden',m!=='portrait');$('trBar').style.width='0';renderTrain();
+ if(!running&&!still.classList.contains('hidden')){const g=m==='portrait'?guidePortrait(detectPeople(still,true)):guideLand(detectScene(still));show(g);draw(still,g,false)}}
+$('mP').onclick=()=>setUIMode('portrait');$('mL').onclick=()=>setUIMode('landscape');
+function renderRecipe(){const R=RECIPES[recipe];$('steps').innerHTML=R.steps.map((t,i)=>`<span>${i+1}. ${t}</span>`).join('')+(recipe!=='auto'&&recipe!=='legs'?'<div class="credit" style="flex-basis:100%">拍法參考 <a href="https://www.slaycamera.com/" target="_blank" rel="noopener">slay composition guides</a>（CC BY 4.0）</div>':'')}
+$('recSel').innerHTML=Object.entries(RECIPES).map(([k,v])=>`<option value="${k}" ${k===recipe?'selected':''}>${v.n}</option>`).join('');
+$('recSel').onchange=e=>{recipe=e.target.value;try{localStorage.setItem('fc_recipe',recipe)}catch(err){}renderRecipe();renderTrain()};
+renderTrain();renderRecipe();
+</script>
+<script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
+</body>
+</html>

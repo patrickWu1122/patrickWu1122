@@ -1,0 +1,2 @@
+{"name":"構圖教練","short_name":"構圖教練","description":"即時構圖與拍照姿勢建議","start_url":"./","scope":"./","display":"standalone","orientation":"portrait","background_color":"#0d0d0f","theme_color":"#0d0d0f","lang":"zh-Hant",
+ "icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}]}

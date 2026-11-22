@@ -34,11 +34,13 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);font:16px/1.4 -a
 #ov{position:absolute;pointer-events:none;will-change:transform}
 .vf.flash::after{content:"";position:absolute;inset:0;background:#fff;animation:fl .28s ease-out forwards;pointer-events:none}@keyframes fl{from{opacity:.85}to{opacity:0}}
 
-.guide{flex:none;min-height:58px;display:flex;align-items:center;justify-content:center;padding:6px 16px 0}
-#pill{text-align:center;opacity:0;max-width:100%}
-#pill.in{animation:pin .35s var(--ease) forwards}@keyframes pin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.guide{flex:none;height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 14px 6px;gap:4px}
+#pill{text-align:center;max-width:100%;opacity:1}
+#pill.in{animation:pin .3s var(--ease)}@keyframes pin{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
+#pill b,#pill small{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+#steps2{display:flex;gap:6px;max-width:100%;overflow-x:auto;scrollbar-width:none;min-height:22px}#steps2::-webkit-scrollbar{display:none}#steps2 span{flex:none;font-size:12px;background:rgba(255,210,63,.16);color:var(--y);border-radius:10px;padding:3px 9px;white-space:nowrap}#steps2 span.nx{background:rgba(255,255,255,.1);color:#ddd}
 #pill b{display:block;font-size:18px;font-weight:700;letter-spacing:.2px}#pill small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
-#pill.ok b{color:var(--g)}
+#pill.ok b{color:var(--g)}#chip{display:none!important}
 #chip{position:absolute;left:50%;top:10px;transform:translate(-50%,-6px);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:20px;padding:5px 12px;font-size:13px;color:#ddd;opacity:0;transition:opacity .3s,transform .3s var(--ease);white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
 #chip.show{opacity:1;transform:translate(-50%,0)}
 #poseToast{position:absolute;left:50%;top:44px;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:12px;padding:8px 12px;font-size:13px;max-width:88%;text-align:center;opacity:0;pointer-events:none}
@@ -145,6 +147,11 @@ h3{font-size:15px;margin:10px 0 8px}
 .aib:active{transform:scale(.92)}.aib i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .25s}
 .aib.on{background:var(--y);color:#000}.aib.on i{background:#000}
 body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity .25s,max-height .3s var(--ease)}body.noai #pill{opacity:.55!important}
+.tray{position:relative;flex:none;height:92px}
+.tray>.comps,.tray>.looks,.tray>.poses{position:absolute;left:0;right:0;top:0;display:flex!important;max-height:none!important;opacity:0!important;visibility:hidden!important;transform:translateY(10px);transition:opacity .26s var(--ease),transform .32s var(--ease),visibility 0s .32s;will-change:transform,opacity}
+.tray>.show{opacity:1!important;visibility:visible!important;transform:none;transition:opacity .26s var(--ease),transform .32s var(--ease),visibility 0s}
+#freeze{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;transition:opacity .35s var(--ease),filter .35s var(--ease);filter:blur(0)}#freeze.on{opacity:1;filter:blur(14px);transition:none}
+#fps{position:absolute;left:10px;bottom:10px;z-index:2;background:rgba(0,0,0,.6);color:#fff;font:600 11px ui-monospace,Menlo,monospace;border-radius:6px;padding:3px 6px;display:none;pointer-events:none}#fps.show{display:block}
 .hidden{display:none!important}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
@@ -157,9 +164,11 @@ body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{o
   <div id="recTime">00:00</div>
   <div class="tr"><button class="aib on" id="aiBtn" aria-label="AI 輔助開關"><i></i>AI</button><button class="ic tm" id="timerBtn" aria-label="計時與自動快門"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><b></b></button><button class="ic" id="compBtn" aria-label="構圖"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-dasharray="2.5 2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button><button class="ic" id="lookBtn" aria-label="濾鏡"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></svg></button><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
  </div>
+ <div class="guide"><div id="pill"><b></b><small></small></div><div id="steps2"></div></div>
  <div class="vfwrap"><div class="vf" id="stage">
   <video id="vid" playsinline muted autoplay></video>
   <canvas id="lv"></canvas>
+  <canvas id="freeze"></canvas><div id="fps"></div>
   <canvas id="ov"></canvas>
   <div id="chip"></div>
   <div id="count"></div>
@@ -170,10 +179,11 @@ body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{o
   <div id="poseToast"></div>
   <div id="cover"><div><b>按下方快門開始取景</b><p id="coverMsg">第一次會詢問相機權限，請按「允許」</p></div></div>
  </div></div>
- <div class="guide"><div id="pill"><b></b><small></small></div></div>
+ <div class="tray" id="tray">
  <div class="comps" id="comps"></div>
  <div class="looks" id="looks"><div class="lrow" id="lookRow"></div><div class="arow" id="lookAmtRow"><span class="ap">強度</span><input type="range" id="lookAmt" min="0" max="100" value="100"><b id="lookAmtV">100</b></div></div>
  <div class="poses" id="poses"></div>
+ </div>
  <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div>
  <div class="ctrl">
   <button id="thumb" aria-label="看剛拍的照片"></button>
@@ -192,6 +202,7 @@ body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{o
   <div id="pSet" class="hidden">
    <h3>拍攝</h3>
    <label class="set"><span>自動快門時連拍 3 張<small>計時或自動快門觸發時一次拍 3 張，方便挑表情</small></span><span class="sw"><input type="checkbox" id="burstOn" checked><span></span></span></label>
+   <label class="set"><span>顯示 FPS<small>左下角顯示畫面更新率與 AI 偵測耗時</small></span><span class="sw"><input type="checkbox" id="fpsOn"><span></span></span></label>
    <label class="set"><span>格線<small>三分法輔助線</small></span><span class="sw"><input type="checkbox" id="gridOn"><span></span></span></label>
    <p class="hint">白色人形是建議的站位與姿勢；人形的某一段變綠，代表那個部位已經對齊。</p>
   <div id="pTrain" style="margin-top:14px">
@@ -264,11 +275,13 @@ const _lc=document.createElement('canvas'),_lx=_lc.getContext('2d',{willReadFreq
 const L=(d,i)=>(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
 
 /* face via MediaPipe or skin heuristic */
+let _dp=false,_lf=null,_lp=null;
 function detectPeople(src,isImage){const g=lumGrid(src,160);let f=null,kp=null;
- if(mpOK){try{const r=isImage?face.detect(src):face.detectForVideo(src,nextTs());if(r.faceLandmarks.length){let best=null,ba=0;for(const lm of r.faceLandmarks){let x0=1,x1=0,y0=1,y1=0;for(const p of lm){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}const a=(x1-x0)*(y1-y0);if(a>ba){ba=a;best={lm,x0,x1,y0,y1}}}
+ if(mpOK){try{const now=performance.now();_dp=!_dp;const doF=isImage||_dp,doP=isImage||!_dp;if(!doF&&_lf&&now-_lf.t<450)f=_lf.f;const r=doF?(isImage?face.detect(src):face.detectForVideo(src,nextTs())):{faceLandmarks:[]};if(r.faceLandmarks.length){let best=null,ba=0;for(const lm of r.faceLandmarks){let x0=1,x1=0,y0=1,y1=0;for(const p of lm){x0=Math.min(x0,p.x);x1=Math.max(x1,p.x);y0=Math.min(y0,p.y);y1=Math.max(y1,p.y)}const a=(x1-x0)*(y1-y0);if(a>ba){ba=a;best={lm,x0,x1,y0,y1}}}
    const lm=best.lm,le=lm[33],re=lm[263],no=lm[1],em={x:(le.x+re.x)/2,y:(le.y+re.y)/2},ed=Math.hypot(re.x-le.x,re.y-le.y)||.01;
    f={cx:(best.x0+best.x1)/2,cy:(best.y0+best.y1)/2,eyeY:em.y,top:best.y0-(best.y1-best.y0)*.25,h:best.y1-best.y0,x0:best.x0,x1:best.x1,yaw:(no.x-em.x)/ed,roll:Math.atan2(re.y-le.y,re.x-le.x)*57.3,n:r.faceLandmarks.length}}
-  const pr=isImage?pose.detect(src):pose.detectForVideo(src,nextTs());if(pr.landmarks.length)kp=pr.landmarks[0]}catch(e){}}
+  if(doF&&!isImage)_lf={f,t:now};
+  if(doP){const pr=isImage?pose.detect(src):pose.detectForVideo(src,nextTs());kp=pr.landmarks.length?pr.landmarks[0]:null;if(!isImage)_lp={kp,t:now}}else if(_lp&&now-_lp.t<450)kp=_lp.kp}catch(e){}}
  if(!f&&!mpOK){const{W,H,d}=g,pts=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4,Y=.299*d[i]+.587*d[i+1]+.114*d[i+2],cb=128-.1687*d[i]-.3313*d[i+1]+.5*d[i+2],cr=128+.5*d[i]-.4187*d[i+1]-.0813*d[i+2];if(Y>45&&cb>77&&cb<127&&cr>138&&cr<173)pts.push([x,y])}
   if(pts.length>W*H*.01){const cell={};for(const[x,y]of pts){const k=(x>>3)+','+(y>>3);(cell[k]=cell[k]||[]).push([x,y])}let best=null,bv=0;for(const k in cell){const[a,b]=k.split(',').map(Number);let v=0,q=[];for(let i=-2;i<=2;i++)for(let j=-2;j<=2;j++){const c=cell[(a+i)+','+(b+j)];if(c){v+=c.length;q=q.concat(c)}}if(v>bv){bv=v;best=q}}
    let x0=W,x1=0,y0=H,y1=0;for(const[x,y]of best){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}const h=Math.min(y1-y0,(x1-x0)*1.4);
@@ -461,12 +474,12 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 function smoothPts(target){if(!target){SM.pts=null;return}if(!SM.pts){SM.pts=target.map(p=>p&&{...p});return}SM.pts=target.map((p,i)=>!p?null:SM.pts[i]?{x:lerp(SM.pts[i].x,p.x,K(.35)),y:lerp(SM.pts[i].y,p.y,K(.35))}:{...p})}
 
 /* ---------- detection loop (~12 fps, decoupled from drawing) ---------- */
-let busy=false,lastDet=0,state={g:null,m:null,ghost:null,per:null};
-function detectTick(){if(!running)return;const now=performance.now();if(!busy&&vid.readyState>=2&&now-lastDet>80){busy=true;lastDet=now;
+let detMs=0,busy=false,lastDet=0,state={g:null,m:null,ghost:null,per:null};
+function detectTick(){if(!running)return;const now=performance.now();if(!busy&&vid.readyState>=2&&now-lastDet>55){busy=true;lastDet=now;const _t0=performance.now();
  try{const mirror=facing==='user';
   if(mode==='portrait'){const r=detectPeople(detSource(),false),g=guidePortrait(r,true),lm=learned();lastShot=g.shot||lastShot;
    const per=personPts(r.kp,mirror),px=per&&per.pts[1]&&per.pts[2]?(per.pts[1].x+per.pts[2].x)/2:null;const gh=ghostPlace(lm,lastShot,px),m=matchPose(per,gh,mirror);state={g,m,ghost:gh,per};updateGuide()}
-  else{const s=detectScene(detSource()),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}busy=false}
+  else{const s=detectScene(detSource()),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}detMs=detMs*.8+(performance.now()-_t0)*.2;busy=false}
  if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,40)}
 
 /* ---------- instruction pill: one clear action at a time ---------- */
@@ -483,9 +496,10 @@ function updateGuide(){const{g,m}=state;let items=[];
   renderTips(items,g.list.filter(i=>i.p<45))}
  else{const ready=g.ready;setPill(ready?{act:'✓ 水平與構圖到位，拍！',why:''}:g.list[0],ready,g.list[1]);renderTips(g.list,[])}}
 let pillTimer=0;function setPill(it,ready,next){const t=it?it.act:'';$('shutter').classList.toggle('ready',!!ready);
- const wait=500-(performance.now()-pillSince);if(t!==pillText&&wait>0){clearTimeout(pillTimer);pillTimer=setTimeout(()=>setPill(it,ready,next),wait+10);return}
+ const wait=800-(performance.now()-pillSince);if(t!==pillText&&wait>0){clearTimeout(pillTimer);pillTimer=setTimeout(()=>setPill(it,ready,next),wait+10);return}
  if(t!==pillText){pillText=t;pillSince=performance.now();const el=$('pill');el.classList.remove('in');void el.offsetWidth;el.querySelector('b').textContent=t;el.querySelector('small').textContent=it&&it.why||'';el.classList.toggle('ok',!!ready);el.classList.add('in')}
- $('chip').textContent=next&&!ready?'接著：'+next.act.split('：')[0]:'';$('chip').classList.toggle('show',!!(next&&!ready))}
+ renderSteps(next&&!ready?next.act.split('：')[0]:'')}
+function renderSteps(nx){const C=typeof comp!=='undefined'&&comp&&COMPBY[comp];const parts=[];if(nx)parts.push(`<span class="nx">接著：${nx}</span>`);if(C)C.steps.forEach((t,i)=>parts.push(`<span>${i+1}. ${t}</span>`));const h=parts.join('');if(h!==renderSteps.h){renderSteps.h=h;$('steps2').innerHTML=h}}
 function renderTips(items,minor){if(!$('sheet').classList.contains('open'))return;const li=(i)=>`<li class="${i.p>=45?'bad':''}"><b>${i.act}</b><small>${i.why||''}</small></li>`;
  $('tips').innerHTML=(items.length?items.map(li).join(''):'<li class="good"><b>目前沒有需要調整的地方</b></li>')+(minor.length?'<li class="hd">小提醒</li>'+minor.map(li).join(''):'')}
 
@@ -870,7 +884,7 @@ setComp(comp);
 function buildCompStrip(){const list=[{id:null,n:'一般'}].concat(COMP.filter(C=>C.mode===mode||(mode==='portrait'&&C.tag==='人像')||(mode==='landscape'&&C.tag==='風景'&&C.mode==='landscape')));
  $('comps').innerHTML=list.map(C=>`<button data-c="${C.id||''}" class="${(C.id||null)===comp?'on':''}"><canvas width="72" height="96"></canvas><span>${C.n.replace('（九宮格）','')}</span></button>`).join('');
  $('comps').querySelectorAll('button').forEach((b,i)=>{const C=list[i],x=b.querySelector('canvas').getContext('2d');x.scale(2,2);if(C.id)drawCompOv(x,36,48,C.ov,'rgba(255,210,63,.95)',C.land&&C.land.hy,true);else{x.strokeStyle='rgba(255,255,255,.5)';x.setLineDash([3,3]);x.beginPath();for(const p of P3){x.moveTo(36*p,0);x.lineTo(36*p,48);x.moveTo(0,48*p);x.lineTo(36,48*p)}x.stroke()}
-  b.onclick=()=>{setComp(C.id);if(C.id){const t=$('poseToast');t.textContent=C.n+'：'+C.steps.slice(0,2).join('、');t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}buildCompStrip();b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}});
+  b.onclick=()=>{setComp(C.id);buildCompStrip();b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}});
  $('compBtn').classList.toggle('on',!!comp)}
 $('compBtn').onclick=()=>{const open=!$('comps').classList.contains('show');$('comps').classList.toggle('show',open);if(open){$('looks').classList.remove('show');buildCompStrip()}};
 $('lookBtn').addEventListener('click',()=>{if($('looks').classList.contains('show'))$('comps').classList.remove('show')});
@@ -908,6 +922,20 @@ const _detectTick=detectTick;detectTick=function(){if(!aiOn){if(running){if(vid.
 // auto shutter needs AI
 const _tb=$('timerBtn').onclick;$('timerBtn').onclick=()=>{_tb();if(!aiOn&&tmode==='auto'){tmode='off';try{localStorage.setItem('fc_timer','off')}catch(e){}renderTimer();const t=$('poseToast');t.textContent='自動快門需要開啟 AI 輔助';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
 applyAI(false);
+/* =================== smoothness: tray, freeze-frame transitions, FPS meter =================== */
+function updTray(){const c=$('comps').classList.contains('show'),l=$('looks').classList.contains('show');$('poses').classList.toggle('show',!c&&!l&&mode==='portrait'&&aiOn)}
+['compBtn','lookBtn','aiBtn'].forEach(id=>$(id).addEventListener('click',()=>requestAnimationFrame(updTray)));
+const _sum2=setUIMode;setUIMode=function(m){_sum2(m);updTray()};document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
+// camera restarts (lens, flip, video mode) fade from a blurred still of the last frame, like the native camera
+const fz=$('freeze');const _start2=start;start=async function(id){if(stream&&vid.videoWidth){fz.width=Math.round(vid.videoWidth/4);fz.height=Math.round(vid.videoHeight/4);fz.getContext('2d').drawImage(vid,0,0,fz.width,fz.height);fz.style.transform=vid.classList.contains('mirror')?'scaleX(-1)':'';fz.classList.add('on')}
+ await _start2(id);const off=()=>setTimeout(()=>fz.classList.remove('on'),60);if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(off);else off()};
+$('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';onUltra=false;zoomLv=1;dz=1;SM.pts=null;if(stream)start()};
+// FPS meter (render rate + AI time) to verify 120 Hz on the phone
+let fpsOn=false;try{fpsOn=localStorage.getItem('fc_fps')==='1'}catch(e){}$('fpsOn').checked=fpsOn;$('fps').classList.toggle('show',fpsOn);
+$('fpsOn').onchange=e=>{fpsOn=e.target.checked;$('fps').classList.toggle('show',fpsOn);try{localStorage.setItem('fc_fps',fpsOn?'1':'0')}catch(err){}};
+let fN=0,fT=0;(function fl(t){requestAnimationFrame(fl);if(!fpsOn)return;fN++;if(!fT)fT=t;if(t-fT>=500){$('fps').textContent=`${Math.round(fN*1000/(t-fT))} fps · AI ${detMs.toFixed(0)} ms`;fN=0;fT=t}})(0);
+const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;renderSteps('')};
+updTray();renderSteps('');
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>

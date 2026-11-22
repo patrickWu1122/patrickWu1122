@@ -89,9 +89,34 @@ html,body{margin:0;height:100%;background:#000;color:var(--ink);font:16px/1.4 -a
 .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px;margin-top:6px}.kv span:nth-child(odd){color:var(--dim)}
 .prog{height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;margin-top:10px}.prog i{display:block;height:100%;width:0;background:var(--y)}
 h3{font-size:15px;margin:10px 0 8px}
-#viewer{position:fixed;inset:0;background:#000;display:none;place-items:center;z-index:9;padding:20px;text-align:center}#viewer.show{display:grid}
-#viewer img{max-width:100%;max-height:74dvh;border-radius:6px;-webkit-touch-callout:default;-webkit-user-select:auto}
-#viewer p{color:var(--dim);font-size:14px}
+.tr{display:flex;align-items:center;gap:8px}.ic.on{background:var(--y)}.ic.on svg{stroke:#000}
+#recTime{position:absolute;left:50%;transform:translateX(-50%);background:var(--r);color:#fff;font:600 15px -apple-system,sans-serif;font-variant-numeric:tabular-nums;padding:3px 10px;border-radius:6px;opacity:0;transition:opacity .2s}#recTime.show{opacity:1}
+.top{position:relative}
+#zoom{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:6px;background:rgba(0,0,0,.35);border-radius:22px;padding:4px;z-index:2}
+#zoom button{appearance:none;border:0;width:36px;height:36px;border-radius:50%;background:rgba(30,30,30,.7);color:#fff;font:600 12px -apple-system,sans-serif;cursor:pointer;transition:transform .2s var(--ease),background .2s}
+#zoom button.on{color:var(--y);transform:scale(1.12);font-size:13px}
+#zoomToast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:600 28px -apple-system,sans-serif;color:var(--y);opacity:0;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,.6)}#zoomToast.show{animation:zt 1s var(--ease) forwards}@keyframes zt{0%,60%{opacity:1}100%{opacity:0}}
+#expRow{position:absolute;left:12px;right:12px;bottom:14px;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:14px;padding:6px 12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:2;font-size:13px}#expRow.show{opacity:1;pointer-events:auto}#expRow input{flex:1;accent-color:var(--y)}#expRow b{font-variant-numeric:tabular-nums;width:34px;text-align:right}
+#chip{z-index:2}
+#shutter.video i{background:var(--r)}#shutter.video.rec i{transform:scale(.5);border-radius:8px}#shutter.video{border-color:#fff}#shutter.video.ready{border-color:var(--g)}
+#thumb.vid{background:#333;position:relative}#thumb.vid::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;font-size:16px}
+#viewer,#editor{position:fixed;inset:0;background:#000;display:none;flex-direction:column;z-index:9;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}#viewer.show,#editor.show{display:flex;animation:up .32s var(--ease)}@keyframes up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.vtop{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;flex:none;font-weight:600}
+.tbtn{appearance:none;border:0;background:none;color:#fff;font:500 17px -apple-system,sans-serif;padding:10px 8px;cursor:pointer;min-height:44px}.tbtn.y{color:var(--y);font-weight:600}
+.vbody{flex:1;display:grid;place-items:center;min-height:0;padding:8px}.vbody img,.vbody video{max-width:100%;max-height:100%;-webkit-touch-callout:default}
+.vbot{flex:none;padding:10px 16px 14px;display:flex;flex-direction:column;gap:8px}#saveHint{margin:0;text-align:center;color:var(--dim);font-size:13px;min-height:18px;opacity:0;transition:opacity .3s}#saveHint.show{opacity:1}
+.ebox{flex:1;display:grid;place-items:center;min-height:0;padding:6px}#ecv{display:block;touch-action:none}
+.ehint{text-align:center;color:var(--dim);font-size:12.5px;margin:4px 16px}
+.epanel{flex:none;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.fstrip{display:flex;gap:10px;overflow-x:auto;padding:6px 14px;scrollbar-width:none}.fstrip::-webkit-scrollbar{display:none}
+.fstrip button{flex:none;appearance:none;border:0;background:none;color:#ddd;padding:0;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;cursor:pointer}
+.fstrip canvas{width:64px;height:64px;border-radius:8px;border:2px solid transparent;transition:border-color .2s,transform .2s var(--ease)}.fstrip button.on canvas{border-color:var(--y);transform:scale(1.05)}.fstrip button.on span{color:var(--y)}
+.achips{display:flex;gap:8px;overflow-x:auto;padding:6px 14px;scrollbar-width:none}.achips::-webkit-scrollbar{display:none}
+.achips button{flex:none;appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#ddd;font:500 14px -apple-system,sans-serif;border-radius:18px;padding:8px 14px;cursor:pointer;position:relative}
+.achips button.on{border-color:var(--y);color:var(--y)}.achips button.mod i{position:absolute;top:4px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--y)}
+.arow{display:flex;align-items:center;gap:12px;padding:10px 18px}.arow input{flex:1;accent-color:var(--y);height:34px}.arow b{width:44px;text-align:right;font-variant-numeric:tabular-nums}.ap{color:var(--dim);font-size:14px}
+.crow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:6px 14px}.crow button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#ddd;font:600 14px -apple-system,sans-serif;border-radius:10px;padding:10px 14px;cursor:pointer;min-width:56px}.crow button.on{border-color:var(--y);color:var(--y)}
+.etabs{flex:none;display:flex;justify-content:center;gap:26px;padding:8px 0 10px}.etab{appearance:none;border:0;background:none;color:var(--dim);font:600 14px -apple-system,sans-serif;padding:8px 2px;cursor:pointer}.etab.on{color:var(--y)}
 .hidden{display:none!important}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
@@ -101,18 +126,21 @@ h3{font-size:15px;margin:10px 0 8px}
  <div class="top">
   <button class="ic" id="more" aria-label="詳細建議與設定"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
   <div id="status">載入 AI 偵測中…</div>
-  <div id="lvl"></div>
+  <div id="recTime">00:00</div>
+  <div class="tr"><div id="lvl"></div><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
  </div>
  <div class="vfwrap"><div class="vf" id="stage">
   <video id="vid" playsinline muted autoplay></video>
   <canvas id="ov"></canvas>
   <div id="chip"></div>
+  <div id="zoom"></div><div id="zoomToast"></div>
+  <div id="expRow"><span>曝光</span><input type="range" id="expSl" min="-2" max="2" step=".1" value="0"><b id="expV">0.0</b></div>
   <div id="poseToast"></div>
   <div id="cover"><div><div class="go"><i></i></div><b>點一下開始取景</b><p id="coverMsg">第一次會詢問相機與動作感測（水平儀）權限，請按「允許」</p></div></div>
  </div></div>
  <div class="guide"><div id="pill"><b></b><small></small></div></div>
  <div class="poses" id="poses"></div>
- <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button></div></div>
+ <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div>
  <div class="ctrl">
   <button id="thumb" aria-label="看剛拍的照片"></button>
   <button id="shutter" aria-label="拍照"><i></i></button>
@@ -142,7 +170,19 @@ h3{font-size:15px;margin:10px 0 8px}
  </div>
 </div>
 <div id="sheetBg"></div>
-<div id="viewer"><div><img id="outImg" alt="剛拍的照片"><p>長按照片 →「加入照片」存到相簿</p><button class="btn" id="closeV" style="max-width:200px">完成</button></div></div>
+<div id="viewer"><div class="vtop"><button class="tbtn" id="closeV">完成</button><span></span><button class="tbtn" id="saveBtn">儲存</button></div>
+ <div class="vbody"><img id="vImg" alt="剛拍的照片"><video id="vVid" class="hidden" controls playsinline></video></div>
+ <div class="vbot"><p id="saveHint"></p><button class="btn pri" id="editBtn">編輯・濾鏡・景深</button></div></div>
+<div id="editor"><div class="vtop"><button class="tbtn" id="eCancel">取消</button><span>編輯</span><button class="tbtn y" id="eSave">儲存</button></div>
+ <div class="ebox" id="ebox"><canvas id="ecv"></canvas></div><p class="ehint">按住照片看原圖</p>
+ <div class="epanel">
+  <div id="eF"><div class="fstrip" id="fStrip"></div></div>
+  <div id="eA" class="hidden"><div class="achips" id="aChips"></div><div class="arow"><input type="range" id="aSl"><b id="aV">0</b><button class="tbtn" id="aReset">重設</button></div></div>
+  <div id="eD" class="hidden"><div class="arow"><span class="ap">光圈</span><input type="range" id="dSl" style="direction:rtl"><b id="dV">f/16</b></div><p class="ehint" id="dState"></p></div>
+  <div id="eC" class="hidden"><div class="crow" id="cRow"></div><p class="ehint">裁切會自動把主角放在三分線上</p></div>
+ </div>
+ <div class="etabs"><button class="etab on" data-t="eF">濾鏡</button><button class="etab" data-t="eA">調整</button><button class="etab" data-t="eD">景深</button><button class="etab" data-t="eC">裁切</button></div>
+</div>
 
 <script type="module">
 const $=id=>document.getElementById(id);
@@ -381,9 +421,9 @@ function smoothPts(target){if(!target){SM.pts=null;return}if(!SM.pts){SM.pts=tar
 let busy=false,lastDet=0,state={g:null,m:null,ghost:null,per:null};
 function detectTick(){if(!running)return;const now=performance.now();if(!busy&&vid.readyState>=2&&now-lastDet>80){busy=true;lastDet=now;
  try{const mirror=facing==='user';
-  if(mode==='portrait'){const r=detectPeople(vid,false),g=guidePortrait(r,true),lm=learned();lastShot=g.shot||lastShot;
+  if(mode==='portrait'){const r=detectPeople(detSource(),false),g=guidePortrait(r,true),lm=learned();lastShot=g.shot||lastShot;
    const per=personPts(r.kp,mirror),px=per&&per.pts[1]&&per.pts[2]?(per.pts[1].x+per.pts[2].x)/2:null;const gh=ghostPlace(lm,lastShot,px),m=matchPose(per,gh,mirror);state={g,m,ghost:gh,per};updateGuide()}
-  else{const s=detectScene(vid),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}busy=false}
+  else{const s=detectScene(detSource()),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}busy=false}
  if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,40)}
 
 /* ---------- instruction pill: one clear action at a time ---------- */
@@ -459,7 +499,7 @@ $('thumb').onclick=()=>{if(lastShot2)$('viewer').classList.add('show')};$('close
 function setUIMode(m){mode=m;document.querySelectorAll('.modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$('modesTrack').style.transform=`translateX(${m==='portrait'?'-28px':'28px'})`;
  $('poses').classList.toggle('hide',m!=='portrait');pillText='';state={g:null,m:null,ghost:null,per:null};SM.ghost=null;SM.pts=null;SM.hz=null;renderTrain&&renderTrain();$('recPane').classList.toggle('hidden',m!=='portrait')}
 document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
-let tx0=null;stage.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX},{passive:true});stage.addEventListener('touchend',e=>{if(tx0==null)return;const dx=e.changedTouches[0].clientX-tx0;tx0=null;if(Math.abs(dx)>60)setUIMode(dx<0?'portrait':'landscape')},{passive:true});
+let tx0=null;stage.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX},{passive:true});stage.addEventListener('touchend',e=>{if(tx0==null)return;const dx=e.changedTouches[0].clientX-tx0;tx0=null;if(Math.abs(dx)>60&&!pinch0){const order=['landscape','portrait','video'],curM=capMode==='video'?'video':mode,i=order.indexOf(curM);setUIMode(order[Math.max(0,Math.min(2,i+(dx<0?1:-1)))])}},{passive:true});
 
 /* ---------- pose picker with drawn thumbnails ---------- */
 function poseThumb(id){const c=document.createElement('canvas'),s=2;c.width=44*s;c.height=64*s;const x=c.getContext('2d');x.scale(s,s);const P=POSES[id].p,k=12.5,ox=22,oy=31;const Q=P.map(p=>[ox+p[0]*k,oy+p[1]*k]);
@@ -486,6 +526,151 @@ $('trIn').onchange=async e=>{const files=[...e.target.files];if(!files.length)re
    else{const s=detectScene(c);M.landscape.s.push({hy:s.hy==null?null:+s.hy.toFixed(3),sx:+s.sx.toFixed(3),sy:+s.sy.toFixed(3)});ok++}URL.revokeObjectURL(img.src)}catch(err){}await new Promise(r=>setTimeout(r,0))}
  M[mode].s=M[mode].s.slice(-500);saveM();$('trHint').textContent=`完成：${files.length} 張中有 ${ok} 張可以使用。`;if(face&&was)await setMode('VIDEO');running=was;if(was){if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else detectTick()}renderTrain()};
 $('trClr').onclick=()=>{M[mode].s=[];saveM();renderTrain();$('trBar').style.width='0'};
+setUIMode('portrait');
+
+/* =================== camera controls: zoom / lens / exposure / torch =================== */
+let track=null,caps={},dz=1,zoomLv=1,lens={ultra:null,wide:null},onUltra=false,capMode='photo',rec=null,recChunks=[],recT0=0,recTimer=0;
+const wc=document.createElement('canvas');
+function applyDigital(){vid.style.transform=`${facing==='user'?'scaleX(-1) ':''}scale(${dz})`}
+async function findLenses(){try{const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==='videoinput');
+ lens.ultra=d.find(x=>/ultra|超廣角/i.test(x.label))||null;lens.wide=d.find(x=>/back|後/i.test(x.label)&&!/ultra|tele|超廣角|望遠/i.test(x.label)&&!/dual|triple|雙|三/i.test(x.label))||null}catch(e){}}
+function zoomOpts(){const o=[];const hw=caps.zoom;if(facing==='environment'&&((hw&&hw.min<1)||lens.ultra))o.push(.5);o.push(1,2,3);return o}
+function renderZoom(){const o=zoomOpts();$('zoom').innerHTML=o.map(z=>`<button data-z="${z}" class="${Math.abs(z-zoomLv)<.05||(z===o[o.length-1]&&zoomLv>z)||(z<zoomLv&&o[o.indexOf(z)+1]>zoomLv&&false)?'on':''}">${Math.abs(z-zoomLv)<.05?(zoomLv<1?'.5':zoomLv%1?zoomLv.toFixed(1):zoomLv)+'×':(z<1?'.5':z)}</button>`).join('');
+ $('zoom').querySelectorAll('button').forEach(b=>b.onclick=()=>setZoom(+b.dataset.z))}
+async function setZoom(z,quiet){z=Math.max(.5,Math.min(8,z));const hw=caps.zoom;
+ try{if(z<1){if(hw&&hw.min<=z){await track.applyConstraints({advanced:[{zoom:z}]});dz=1}else if(lens.ultra&&!onUltra){onUltra=true;await start(lens.ultra.deviceId);dz=1}else if(!lens.ultra&&!(hw&&hw.min<1))z=1}
+  else{if(onUltra){onUltra=false;await start();}if(hw&&hw.max>=1){const h=Math.min(z,hw.max);await track.applyConstraints({advanced:[{zoom:Math.max(hw.min,h)}]});dz=z/Math.max(hw.min,h)}else dz=z}}catch(e){dz=Math.max(1,z)}
+ zoomLv=z;applyDigital();renderZoom();if(!quiet){const t=$('zoomToast');t.textContent=(z<1?'0.5':z%1?z.toFixed(1):z)+'×';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}}
+// pinch to zoom like the native camera
+let pinch0=null;stage.addEventListener('touchstart',e=>{if(e.touches.length===2){const[a,b]=e.touches;pinch0={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),z:zoomLv};tx0=null}},{passive:true});
+stage.addEventListener('touchmove',e=>{if(pinch0&&e.touches.length===2){const[a,b]=e.touches;const z=pinch0.z*Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)/pinch0.d;zoomLv=Math.max(1,Math.min(8,z));if(!onUltra&&caps.zoom&&caps.zoom.max>=zoomLv){track.applyConstraints({advanced:[{zoom:zoomLv}]}).catch(()=>{});dz=1}else dz=zoomLv;applyDigital();renderZoom()}},{passive:true});
+stage.addEventListener('touchend',e=>{if(e.touches.length<2&&pinch0){pinch0=null;setZoom(zoomLv,true)}},{passive:true});
+// exposure compensation + torch, only when the phone exposes them
+function setupCtl(){const ec=caps.exposureCompensation;$('expBtn').classList.toggle('hidden',!ec);if(ec){const s=$('expSl');s.min=ec.min;s.max=ec.max;s.step=ec.step||.1;s.value=0}
+ $('torch').classList.toggle('hidden',!caps.torch)}
+$('expBtn').onclick=()=>$('expRow').classList.toggle('show');
+$('expSl').oninput=e=>{track&&track.applyConstraints({advanced:[{exposureCompensation:+e.target.value}]}).catch(()=>{});$('expV').textContent=(+e.target.value>0?'+':'')+(+e.target.value).toFixed(1)};
+let torchOn=false;$('torch').onclick=()=>{torchOn=!torchOn;track&&track.applyConstraints({advanced:[{torch:torchOn}]}).catch(()=>{});$('torch').classList.toggle('on',torchOn)};
+
+/* camera start (replaces the basic one): lens + audio for video mode */
+start=async function(deviceId){$('cover').classList.add('gone');enableMotion();
+ try{if(stream)stream.getTracks().forEach(t=>t.stop());
+  const v={width:{ideal:1920},height:{ideal:1440},aspectRatio:{ideal:4/3}};if(deviceId)v.deviceId={exact:deviceId};else v.facingMode=facing;
+  stream=await navigator.mediaDevices.getUserMedia({video:v,audio:capMode==='video'});
+  vid.srcObject=stream;vid.classList.toggle('mirror',facing==='user');await vid.play();track=stream.getVideoTracks()[0];caps=track.getCapabilities?track.getCapabilities():{};
+  if(!lens.ultra&&!lens.wide)await findLenses();if(face)await setMode('VIDEO');running=true;sizeOv();applyDigital();renderZoom();setupCtl();
+  if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else detectTick()}
+ catch(e){$('cover').classList.remove('gone');$('coverMsg').textContent=capMode==='video'?'錄影需要相機和麥克風權限：請到「設定 → Safari」把相機、麥克風改成「允許」。':'無法開啟相機：請到「設定 → Safari → 相機」改成「允許」，再點一次。'}};
+$('cover').onclick=()=>start();
+$('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';onUltra=false;zoomLv=1;dz=1;SM.pts=null;if(stream)start()};
+
+/* frame used for detection: the digitally-zoomed crop, so advice matches what is on screen */
+function detSource(){if(dz<=1.01)return vid;const w=vid.videoWidth,h=vid.videoHeight,cw=w/dz,ch=h/dz;wc.width=720;wc.height=Math.round(720*ch/cw);wc.getContext('2d').drawImage(vid,(w-cw)/2,(h-ch)/2,cw,ch,0,0,wc.width,wc.height);return wc}
+function grabFrame(){const w=vid.videoWidth,h=vid.videoHeight,cw=Math.round(w/dz),ch=Math.round(h/dz),c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');
+ if(facing==='user'){x.translate(cw,0);x.scale(-1,1)}x.drawImage(vid,(w-cw)/2,(h-ch)/2,cw,ch,0,0,cw,ch);return c}
+
+/* =================== photo roll + viewer =================== */
+const ROLL=[];let cur=null;
+function addShot(item){ROLL.unshift(item);if(ROLL.length>30){const o=ROLL.pop();URL.revokeObjectURL(o.url)}$('thumb').style.backgroundImage=item.type==='video'?'none':`url(${item.url})`;$('thumb').classList.toggle('vid',item.type==='video')}
+$('shutter').onclick=()=>{if(!stream||!vid.videoWidth)return;
+ if(capMode==='video'){rec&&rec.state==='recording'?stopRec():startRec();return}
+ const c=grabFrame();stage.classList.remove('flash');void stage.offsetWidth;stage.classList.add('flash');
+ const per=state.per,sub=per&&per.pts[1]&&per.pts[2]?{x:(per.pts[1].x+per.pts[2].x)/2,y:per.pts[0]?per.pts[0].y:(per.pts[1].y)}:null;
+ c.toBlob(b=>addShot({type:'photo',blob:b,url:URL.createObjectURL(b),canvas:c,subject:sub}),'image/jpeg',.95)};
+function startRec(){const types=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm'];const mt=types.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
+ try{rec=new MediaRecorder(stream,mt?{mimeType:mt,videoBitsPerSecond:8e6}:{})}catch(e){$('pill').querySelector('b').textContent='這台手機不支援錄影';return}
+ recChunks=[];rec.ondataavailable=e=>e.data.size&&recChunks.push(e.data);rec.onstop=()=>{const b=new Blob(recChunks,{type:rec.mimeType||'video/mp4'});addShot({type:'video',blob:b,url:URL.createObjectURL(b)})};
+ rec.start(500);recT0=performance.now();$('shutter').classList.add('rec');$('recTime').classList.add('show');recTimer=setInterval(()=>{const s=Math.floor((performance.now()-recT0)/1000);$('recTime').textContent=`${String(s/60|0).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`},250)}
+function stopRec(){if(rec&&rec.state!=='inactive')rec.stop();clearInterval(recTimer);$('shutter').classList.remove('rec');$('recTime').classList.remove('show');$('recTime').textContent='00:00'}
+$('thumb').onclick=()=>{if(!ROLL.length)return;openViewer(ROLL[0])};
+function openViewer(it){cur=it;const v=$('viewer');v.classList.add('show');$('vImg').classList.toggle('hidden',it.type!=='photo');$('vVid').classList.toggle('hidden',it.type!=='video');$('editBtn').classList.toggle('hidden',it.type!=='photo');
+ if(it.type==='photo')$('vImg').src=it.url;else{$('vVid').src=it.url}}
+$('closeV').onclick=()=>{$('viewer').classList.remove('show');$('vVid').pause()};
+async function saveBlob(blob,name){const f=new File([blob],name,{type:blob.type});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f]});return true}catch(e){if(e.name==='AbortError')return true}}
+ $('saveHint').textContent=blob.type.startsWith('video')?'長按影片 → 分享 → 儲存影片':'長按照片 →「加入照片」存到相簿';$('saveHint').classList.add('show');return false}
+$('saveBtn').onclick=()=>cur&&saveBlob(cur.blob,cur.type==='video'?`framecoach-${Date.now()}.${cur.blob.type.includes('mp4')?'mp4':'webm'}`:`framecoach-${Date.now()}.jpg`);
+$('editBtn').onclick=()=>cur&&openEditor(cur);
+
+/* =================== editor (WebGL, real-time) =================== */
+const ecv=$('ecv');const gl=ecv.getContext('webgl',{preserveDrawingBuffer:true,premultipliedAlpha:false});
+const VS='attribute vec2 p;varying vec2 v;void main(){v=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0,1);}';
+const FS=`precision highp float;varying vec2 v;uniform sampler2D img,msk;uniform vec4 crop;uniform float ev,con,hi,sh,temp,tint,sat,vib,fade,vig,blur,hasMask,ar;
+vec3 bl(vec2 uv,float r){vec3 a=vec3(0.);for(int i=0;i<40;i++){float fi=float(i);float an=fi*2.39996;float d=sqrt((fi+.5)/40.);a+=texture2D(img,uv+vec2(cos(an)*d*r/ar,sin(an)*d*r)).rgb;}return a/40.;}
+void main(){vec2 uv=crop.xy+v*crop.zw;float m=hasMask>.5?texture2D(msk,uv).r:1.;float r=blur*.03*(1.-smoothstep(.25,.75,m));
+vec3 c=r>.0006?bl(uv,r):texture2D(img,uv).rgb;c*=pow(2.,ev);c.r+=temp*.12;c.b-=temp*.12;c.g-=tint*.08;
+float L=dot(c,vec3(.2126,.7152,.0722));float s=sh*.45*pow(1.-clamp(L,0.,1.),2.),h=hi*.45*pow(clamp(L,0.,1.),2.);c+=s+h;
+c=(c-.5)*(1.+con)+.5;L=dot(c,vec3(.2126,.7152,.0722));float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b));float cs=mx>0.?(mx-mn)/mx:0.;
+c=L+(c-L)*(1.+sat)*(1.+vib*(1.-cs));float f=fade*.18;c=c*(1.-f)+f;vec2 q=v-.5;c*=1.-vig*min(1.,dot(q,q)*2.2);gl_FragColor=vec4(clamp(c,0.,1.),1.);}`;
+function sh_(t,s){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.log(gl.getShaderInfoLog(o));return o}
+const prog=gl.createProgram();gl.attachShader(prog,sh_(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh_(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const ap=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(ap);gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+const U={};['img','msk','crop','ev','con','hi','sh','temp','tint','sat','vib','fade','vig','blur','hasMask','ar'].forEach(k=>U[k]=gl.getUniformLocation(prog,k));
+function tex(unit){const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);for(const[p,v]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,p,v);return t}
+const tImg=tex(0),tMsk=tex(1);gl.uniform1i(U.img,0);gl.uniform1i(U.msk,1);
+
+const ADJ=[['ev','曝光',-2,2,.05],['con','對比',-1,1,.02],['hi','亮部',-1,1,.02],['sh','暗部',-1,1,.02],['temp','色溫',-1,1,.02],['tint','色調',-1,1,.02],['sat','飽和度',-1,1,.02],['vib','鮮豔度',-1,1,.02],['fade','褪色',0,1,.02],['vig','暗角',0,1,.02]];
+const Z0=Object.fromEntries(ADJ.map(a=>[a[0],0]));
+const FSTOPS=[[16,0],[8,.12],[5.6,.25],[4,.38],[2.8,.55],[2,.75],[1.4,1]];
+let E={src:null,W:0,H:0,p:{...Z0},base:{...Z0},filter:'none',blurI:0,mask:false,crop:null,ratio:'orig',tool:'ev',stats:null,orig:false};
+function imgStats(c){const t=document.createElement('canvas'),W=96,H=Math.round(96*c.height/c.width);t.width=W;t.height=H;const x=t.getContext('2d');x.drawImage(c,0,0,W,H);const d=x.getImageData(0,0,W,H).data;let L=0,hi=0,lo=0,R=0,G=0,B=0,S=0,n=W*H;
+ for(let i=0;i<d.length;i+=4){const r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255,l=.2126*r+.7152*g+.0722*b;L+=l;if(l>.96)hi++;if(l<.04)lo++;R+=r;G+=g;B+=b;const mx=Math.max(r,g,b);S+=mx?(mx-Math.min(r,g,b))/mx:0}
+ return{mL:L/n,hi:hi/n,lo:lo/n,cast:(R-B)/n,green:(G-(R+B)/2)/n,sat:S/n}}
+function filters(){const s=E.stats,cl=(v,a,b)=>Math.max(a,Math.min(b,v));const a={...Z0,ev:+cl((.47-s.mL)*2.4,-1,1.2).toFixed(2),sh:s.lo>.03?.35:.1,hi:s.hi>.02?-.4:-.1,temp:+cl(-s.cast*2,-.4,.4).toFixed(2),tint:+cl(s.green*3,-.3,.3).toFixed(2),vib:.15};
+ const m=o=>{const r={...a};for(const k in o)r[k]=+((['ev','temp','tint'].includes(k)?a[k]:0)+o[k]).toFixed(2);return r};
+ return[['none','原圖',{...Z0},0],['auto','自動修正',a,0],['airy','通透日系',m({ev:.25,con:-.2,sh:.45,hi:-.2,sat:-.15,temp:-.08,fade:.18}),s.mL>.5?2:0],['cream','奶油膚',m({ev:.15,con:-.1,sh:.3,temp:.12,tint:.04,sat:-.08,vib:.1,fade:.1}),state.per?1.5:0],
+  ['film','電影感',m({con:.15,hi:-.45,sh:.1,sat:-.2,temp:.08,tint:.05,vig:.45,fade:.12}),s.mL<.38?2:0],['vivid','鮮明',m({con:.22,vib:.5,sat:.1}),s.sat<.25?2:0],['warm','暖陽',m({temp:.35,vib:.25,sh:.2,hi:-.15}),s.cast<0?1:0],
+  ['cool','清冷',m({temp:-.3,con:.1,sat:-.1,hi:-.1}),0],['bw','黑白',m({sat:-1,vib:0,con:.32,vig:.3}),0]]}
+function cropRect(ratio){const W=E.W,H=E.H;if(ratio==='orig')return{x:0,y:0,w:W,h:H};const r={'45':4/5,'11':1,'916':9/16,'34':3/4,'169':16/9}[ratio];let w,h;if(W/H>r){h=H;w=H*r}else{w=W;h=W/r}
+ const sub=E.subject||{x:.5,y:.4},px=sub.x*W,py=sub.y*H;let best=null,bd=1e9;for(const fx of[1/3,.5,2/3])for(const fy of[1/3,.5]){let x=Math.max(0,Math.min(W-w,px-fx*w)),y=Math.max(0,Math.min(H-h,py-fy*h));const d=Math.hypot((px-x)/w-fx,(py-y)/h-fy)+(fx===.5?.03:0);if(d<bd){bd=d;best={x,y,w,h}}}return best}
+function draw_(w,h,params){ecv.width=w;ecv.height=h;gl.viewport(0,0,w,h);const c=E.crop;gl.uniform4f(U.crop,c.x/E.W,c.y/E.H,c.w/E.W,c.h/E.H);gl.uniform1f(U.ar,E.W/E.H);
+ for(const[k]of ADJ)gl.uniform1f(U[k],params[k]);gl.uniform1f(U.blur,params===Z0?0:E.blurI);gl.uniform1f(U.hasMask,E.mask?1:0);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}
+let rq=0;function paint(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;const box=$('ebox').getBoundingClientRect(),c=E.crop,dpr=Math.min(2,devicePixelRatio||1),k=Math.min(box.width/c.w,box.height/c.h);const w=Math.round(c.w*k),h=Math.round(c.h*k);
+ ecv.style.width=w+'px';ecv.style.height=h+'px';draw_(Math.round(w*dpr),Math.round(h*dpr),E.orig?Z0:E.p)})}
+async function openEditor(it){E.src=it.canvas;E.W=it.canvas.width;E.H=it.canvas.height;E.subject=it.subject;E.p={...Z0};E.base={...Z0};E.filter='none';E.blurI=0;E.mask=false;E.ratio='orig';E.crop=cropRect('orig');E.stats=imgStats(it.canvas);E.item=it;
+ const mx=gl.getParameter(gl.MAX_TEXTURE_SIZE);let src=it.canvas;if(Math.max(E.W,E.H)>mx){const k=mx/Math.max(E.W,E.H),t=document.createElement('canvas');t.width=E.W*k|0;t.height=E.H*k|0;t.getContext('2d').drawImage(it.canvas,0,0,t.width,t.height);src=t}
+ gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,tImg);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,src);
+ $('editor').classList.add('show');$('viewer').classList.remove('show');buildFilters();buildAdj();buildCrop();buildDepth();paint();segment(src)}
+function buildFilters(){const L=filters(),top=Math.max(...L.map(f=>f[3]));const th=document.createElement('canvas');
+ $('fStrip').innerHTML=L.map(([id,n,,r])=>`<button data-f="${id}" class="${id===E.filter?'on':''}"><canvas width="128" height="128"></canvas><span>${n}${r&&r===top?' ✦':''}</span></button>`).join('');
+ const save={crop:E.crop,blur:E.blurI};const s=Math.min(E.W,E.H);E.crop={x:(E.W-s)/2,y:(E.H-s)/2,w:s,h:s};const bi=E.blurI;E.blurI=0;
+ $('fStrip').querySelectorAll('button').forEach((b,i)=>{draw_(128,128,L[i][2]);b.querySelector('canvas').getContext('2d').drawImage(ecv,0,0);
+  b.onclick=()=>{E.filter=L[i][0];E.base={...L[i][2]};E.p={...E.base};$('fStrip').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncAdj();paint()}});E.crop=save.crop;E.blurI=bi}
+function buildAdj(){$('aChips').innerHTML=ADJ.map(([k,n])=>`<button data-k="${k}" class="${k===E.tool?'on':''}">${n}<i></i></button>`).join('');
+ $('aChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{E.tool=b.dataset.k;$('aChips').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));syncAdj()});syncAdj()}
+function syncAdj(){const a=ADJ.find(x=>x[0]===E.tool),s=$('aSl');s.min=a[2];s.max=a[3];s.step=a[4];s.value=E.p[E.tool];$('aV').textContent=fmtV(E.p[E.tool]);
+ $('aChips').querySelectorAll('button').forEach(b=>b.classList.toggle('mod',Math.abs(E.p[b.dataset.k])>.001))}
+const fmtV=v=>(v>0?'+':'')+Math.round(v*100);
+$('aSl').oninput=e=>{E.p[E.tool]=+e.target.value;$('aV').textContent=fmtV(E.p[E.tool]);paint()};
+$('aReset').onclick=()=>{E.p={...E.base};syncAdj();paint()};
+function buildCrop(){const R=[['orig','原始'],['45','4:5'],['11','1:1'],['916','9:16'],['34','3:4'],['169','16:9']];$('cRow').innerHTML=R.map(([k,n])=>`<button data-r="${k}" class="${k===E.ratio?'on':''}">${n}</button>`).join('');
+ $('cRow').querySelectorAll('button').forEach(b=>b.onclick=()=>{E.ratio=b.dataset.r;E.crop=cropRect(E.ratio);$('cRow').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));paint()})}
+function buildDepth(){const s=$('dSl');s.min=0;s.max=FSTOPS.length-1;s.step=1;s.value=0;$('dV').textContent='f/16';
+ s.oninput=()=>{const[f,b]=FSTOPS[+s.value];E.blurI=b;$('dV').textContent='f/'+f;paint()}}
+let seg=null;
+async function segment(src){$('dState').textContent='正在辨識人物…';E.mask=false;
+ try{if(!seg){const V=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');const fs=await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+   seg=await V.ImageSegmenter.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite',delegate:'GPU'},runningMode:'IMAGE',outputConfidenceMasks:true,outputCategoryMask:false})}
+  const k=Math.min(1,768/Math.max(src.width,src.height)),t=document.createElement('canvas');t.width=src.width*k|0;t.height=src.height*k|0;t.getContext('2d').drawImage(src,0,0,t.width,t.height);
+  const r=seg.segment(t),m=r.confidenceMasks[0],f=m.getAsFloat32Array(),u=new Uint8Array(f.length);for(let i=0;i<f.length;i++)u[i]=f[i]*255;
+  gl.activeTexture(gl.TEXTURE1);gl.bindTexture(gl.TEXTURE_2D,tMsk);gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.LUMINANCE,m.width,m.height,0,gl.LUMINANCE,gl.UNSIGNED_BYTE,u);m.close&&m.close();
+  let any=0;for(let i=0;i<u.length;i+=7)if(u[i]>128)any++;E.mask=any>u.length/7*.02;$('dState').textContent=E.mask?'已辨識人物：往左滑光圈越大，背景越模糊（像 iPhone 人像模式）':'照片中找不到人物，會模糊整張照片';paint()}
+ catch(e){$('dState').textContent='景深需要網路下載人物辨識模型（第一次）。目前會模糊整張照片。'}}
+document.querySelectorAll('.etab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.etab').forEach(x=>{x.classList.toggle('on',x===t);$(x.dataset.t).classList.toggle('hidden',x!==t)})});
+const eo=e=>{e.preventDefault();E.orig=true;paint()},ef=()=>{if(E.orig){E.orig=false;paint()}};ecv.addEventListener('pointerdown',eo);addEventListener('pointerup',ef);ecv.addEventListener('pointerleave',ef);
+$('eCancel').onclick=()=>$('editor').classList.remove('show');
+$('eSave').onclick=()=>{const c=E.crop,k=Math.min(1,4096/Math.max(c.w,c.h));draw_(Math.round(c.w*k),Math.round(c.h*k),E.p);
+ ecv.toBlob(async b=>{const it={type:'photo',blob:b,url:URL.createObjectURL(b),canvas:(()=>{const t=document.createElement('canvas');t.width=ecv.width;t.height=ecv.height;t.getContext('2d').drawImage(ecv,0,0);return t})(),subject:E.subject};
+  addShot(it);paint();$('editor').classList.remove('show');openViewer(it);saveBlob(b,`framecoach-${Date.now()}.jpg`)},'image/jpeg',.94)};
+addEventListener('resize',()=>{if($('editor').classList.contains('show'))paint()});
+
+/* =================== modes: 風景 · 人像 · 錄影 =================== */
+const baseSetMode=setUIMode;
+setUIMode=function(m){const was=capMode;capMode=m==='video'?'video':'photo';baseSetMode(m==='video'?'portrait':m);
+ document.querySelectorAll('.modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));const on=document.querySelector(`.modes button[data-m="${m}"]`);
+ if(on){const tr=$('modesTrack'),cx=tr.parentElement.getBoundingClientRect().width/2,bx=on.offsetLeft+on.offsetWidth/2;tr.style.transform=`translateX(${cx-bx}px)`}
+ $('shutter').classList.toggle('video',capMode==='video');if(was!==capMode&&stream){if(rec&&rec.state==='recording')stopRec();start(onUltra&&lens.ultra?lens.ultra.deviceId:undefined)}};
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
 setUIMode('portrait');
 
 </script>

@@ -2,117 +2,153 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="構圖教練">
-<meta name="theme-color" content="#0d0d0f">
+<meta name="theme-color" content="#000000">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>構圖教練 Live</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<title>構圖教練</title>
 <style>
-/* VOICE: a pro camera's live view with a quiet coach
-   IDEA: mirrorless camera back screen — black housing, focus-confirm green, guide yellow
-   PICTURE: the live viewfinder itself, full width, with target ring, arrow and horizon guides
-   COLOUR and TYPE: black #0d0d0f, warm white, guide yellow #ffd23f, confirm green #4ade80; Inter Tight numbers, Noto Sans TC
-   LAYOUT: mode switch on top, viewfinder, shutter row, then training panel */
-:root{color-scheme:dark;--bg:#0d0d0f;--pan:#18181c;--line:#2a2a30;--ink:#f3f1ec;--dim:#9a9aa3;--acc:#ffd23f;--ok:#4ade80;--bad:#ff5a4e}
-*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-.num{font-family:"Inter Tight",system-ui,sans-serif;font-variant-numeric:tabular-nums}
-.wrap{max-width:1100px;margin:0 auto;padding:10px 14px 40px;display:grid;gap:14px}
-@media(min-width:900px){.wrap{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start}.vf{position:sticky;top:10px}}
-.top{display:flex;gap:10px;align-items:center;justify-content:space-between;grid-column:1/-1}
-h1{font-size:18px;margin:0}h1 b{color:var(--acc)}
-.seg{display:flex;background:var(--pan);border:1px solid var(--line);border-radius:12px;padding:3px}
-.seg button{appearance:none;border:0;background:none;color:var(--dim);font:700 16px "Noto Sans TC";min-height:40px;padding:0 18px;border-radius:9px;cursor:pointer}
-.seg button.on{background:var(--acc);color:#111}
-.stage{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;display:grid;place-items:center}
-.stage video,.stage canvas.still{max-width:100%;max-height:100%;display:block}
-#ov{position:absolute;pointer-events:none}
-.empty{text-align:center;color:var(--dim);padding:24px}
-.badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.6);padding:4px 12px;border-radius:20px;font-size:18px;font-weight:700}
-.status{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);padding:4px 10px;border-radius:20px;font-size:13px;color:var(--dim)}
-.guide{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(0,0,0,.7);padding:8px 14px;border-radius:12px;font-weight:700;font-size:16px;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row>*{flex:1}
-.btn{appearance:none;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:500 16px "Noto Sans TC";min-height:46px;padding:10px 14px;border-radius:12px;cursor:pointer;text-align:center}
-.btn.pri{background:var(--acc);color:#111;border-color:var(--acc);font-weight:700}
-.btn:focus-visible,.seg button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.shutter{flex:0 0 72px;height:72px;border-radius:50%;border:4px solid #fff;background:#fff3;padding:0}
-.shutter.ready{background:var(--ok);border-color:#d9ffe6}
-.panel{background:var(--pan);border:1px solid var(--line);border-radius:14px;padding:16px}
-h2{font-size:16px;margin:0 0 8px}
-.tips{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:8px}
-.tips li{padding:9px 12px;border-radius:10px;background:#222228;font-size:15px;border-left:3px solid var(--acc)}
-.tips li.bad{border-left-color:var(--bad)}.tips li.hd{background:none;border:0;padding:6px 0 0;font-weight:700;color:var(--dim);font-size:14px}.tips li b{display:block;font-weight:700}.tips li small{display:block;color:var(--dim);font-size:13px;margin-top:2px}.tips li.good{border-left-color:var(--ok)}
-.hint{color:var(--dim);font-size:13px;margin:6px 0 0}
-.train{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center}
-.train canvas{width:120px;height:160px;border-radius:8px;background:#000}
-.big{font-size:34px;font-weight:700;line-height:1}
-.prog{height:6px;background:#2a2a30;border-radius:3px;overflow:hidden;margin-top:8px}.prog i{display:block;height:100%;width:0;background:var(--acc)}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px;margin-top:8px}.kv span:nth-child(odd){color:var(--dim)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;place-items:center;padding:20px;z-index:9;text-align:center}
-.modal.show{display:grid}.modal img{max-width:100%;max-height:70vh;border-radius:10px}
-.rec{display:flex;align-items:center;gap:10px;margin-top:10px}.rec span{color:var(--dim);font-size:14px;white-space:nowrap}.rec select{flex:1;min-height:46px;font:500 16px 'Noto Sans TC';background:var(--pan);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:0 12px}
-.steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.steps span{background:#24242a;border-radius:20px;padding:4px 10px;font-size:13px}.credit{color:var(--dim);font-size:12px;margin-top:6px}.credit a{color:var(--dim)}
+/* VOICE: the iOS Camera app with a quiet coach inside it
+   IDEA: the native camera — black chrome, yellow accents, a level line, mode words under the viewfinder
+   PICTURE: the live viewfinder with a white ghost silhouette showing exactly where to stand and how to pose
+   COLOUR and TYPE: pure black, white, iOS camera yellow #ffd23f, confirm green #4ade80; system font (SF on iPhone)
+   LAYOUT: top bar · 3:4 viewfinder · pose strip · mode words · shutter row; details in a bottom sheet */
+:root{color-scheme:dark;--y:#ffd23f;--g:#4ade80;--r:#ff5a4e;--ink:#fff;--dim:rgba(255,255,255,.6);--pan:#1c1c1e;--line:rgba(255,255,255,.12);--ease:cubic-bezier(.32,.72,0,1)}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{margin:0;height:100%;background:#000;color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang TC","Noto Sans TC",sans-serif;overflow:hidden;overscroll-behavior:none}
+#app{height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.top{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex:none}
+.ic{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .2s var(--ease),background .2s}
+.ic:active{transform:scale(.9);background:rgba(255,255,255,.22)}
+.ic svg{width:18px;height:18px}
+#status{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px}#status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--y)}
+#status.ai::before{background:var(--g)}
+#lvl{font:600 13px -apple-system,sans-serif;font-variant-numeric:tabular-nums;color:var(--dim);min-width:60px;text-align:right;transition:color .2s}#lvl.lv{color:var(--y)}
+.vfwrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+.vf{position:relative;width:100%;max-height:100%;aspect-ratio:3/4;background:#111;overflow:hidden;touch-action:pan-y}
+.vf video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translateZ(0)}
+.vf video.mirror{transform:scaleX(-1) translateZ(0)}
+#ov{position:absolute;pointer-events:none;will-change:transform}
+.vf.flash::after{content:"";position:absolute;inset:0;background:#fff;animation:fl .28s ease-out forwards;pointer-events:none}@keyframes fl{from{opacity:.85}to{opacity:0}}
+
+.guide{flex:none;min-height:58px;display:flex;align-items:center;justify-content:center;padding:6px 16px 0}
+#pill{text-align:center;opacity:0;max-width:100%}
+#pill.in{animation:pin .35s var(--ease) forwards}@keyframes pin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#pill b{display:block;font-size:18px;font-weight:700;letter-spacing:.2px}#pill small{display:block;font-size:12.5px;color:var(--dim);margin-top:2px}
+#pill.ok b{color:var(--g)}
+#chip{position:absolute;left:50%;top:10px;transform:translate(-50%,-6px);background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:20px;padding:5px 12px;font-size:13px;color:#ddd;opacity:0;transition:opacity .3s,transform .3s var(--ease);white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}
+#chip.show{opacity:1;transform:translate(-50%,0)}
+#poseToast{position:absolute;left:50%;top:44px;transform:translateX(-50%);background:rgba(0,0,0,.7);border-radius:12px;padding:8px 12px;font-size:13px;max-width:88%;text-align:center;opacity:0;pointer-events:none}
+#poseToast.show{animation:toast 2.6s var(--ease) forwards}@keyframes toast{0%{opacity:0;transform:translate(-50%,6px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+#cover{position:absolute;inset:0;display:grid;place-items:center;background:#000;text-align:center;padding:24px;transition:opacity .4s var(--ease);z-index:3}
+#cover.gone{opacity:0;pointer-events:none}
+#cover .go{width:76px;height:76px;border-radius:50%;border:4px solid #fff;display:grid;place-items:center;margin:0 auto 14px}#cover .go i{width:58px;height:58px;border-radius:50%;background:#fff;display:block}
+#cover p{color:var(--dim);font-size:14px;margin:6px 0 0}
+.poses{flex:none;display:flex;gap:10px;overflow-x:auto;padding:10px 14px 4px;scroll-snap-type:x mandatory;scrollbar-width:none;transition:opacity .25s,max-height .3s var(--ease);max-height:96px}
+.poses::-webkit-scrollbar{display:none}.poses.hide{opacity:0;max-height:0;padding:0;pointer-events:none}
+.poses button{flex:none;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.08);border-radius:12px;padding:4px 6px 3px;color:#fff;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;transition:transform .2s var(--ease),border-color .2s,background .2s}
+.poses button:active{transform:scale(.94)}.poses button.on{border-color:var(--y);background:rgba(255,210,63,.12)}
+.poses img{width:30px;height:44px;opacity:.9}.poses span{font-size:11px;white-space:nowrap;color:#ddd}.poses button.on span{color:var(--y)}
+.modes{flex:none;height:34px;overflow:hidden;display:flex;justify-content:center}
+#modesTrack{display:flex;gap:22px;transition:transform .35s var(--ease)}
+.modes button{appearance:none;border:0;background:none;color:#fff;font:600 13px -apple-system,sans-serif;letter-spacing:1.2px;padding:8px 2px;cursor:pointer;opacity:.85;transition:color .25s}
+.modes button.on{color:var(--y);opacity:1}
+.ctrl{flex:none;height:104px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 28px}
+#thumb{justify-self:start;width:46px;height:46px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:#1c1c1e center/cover;cursor:pointer;transition:transform .2s var(--ease)}#thumb:active{transform:scale(.9)}
+#shutter{width:76px;height:76px;border-radius:50%;border:4px solid #fff;background:none;padding:0;cursor:pointer;display:grid;place-items:center}
+#shutter i{width:62px;height:62px;border-radius:50%;background:#fff;display:block;transition:transform .15s var(--ease),background .25s}
+#shutter:active i{transform:scale(.88)}#shutter.ready{border-color:var(--g)}#shutter.ready i{background:var(--g)}
+.rgt{justify-self:end;display:flex;gap:12px}
+/* sheet */
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .3s;z-index:5}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-height:78dvh;background:var(--pan);border-radius:16px 16px 0 0;transform:translateY(102%);transition:transform .42s var(--ease);z-index:6;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#sheet.open{transform:none}#sheet.open+#sheetBg,#sheet.open~#sheetBg{opacity:1;pointer-events:auto}
+#grab{padding:8px 0 4px;display:grid;place-items:center;flex:none}#grab i{width:38px;height:5px;border-radius:3px;background:rgba(255,255,255,.3)}
+.stabs{display:flex;gap:4px;margin:4px 14px 8px;background:rgba(255,255,255,.08);border-radius:10px;padding:3px;flex:none}
+.stab{flex:1;appearance:none;border:0;background:none;color:#ddd;font:600 14px -apple-system,sans-serif;height:34px;border-radius:8px;cursor:pointer;transition:background .2s}
+.stab.on{background:rgba(255,255,255,.18);color:#fff}
+.sbody{overflow-y:auto;padding:0 16px 20px;-webkit-overflow-scrolling:touch;-webkit-user-select:text;user-select:text}
+.tips{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.tips li{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 12px;border-left:3px solid var(--y)}.tips li.bad{border-left-color:var(--r)}.tips li.good{border-left-color:var(--g)}
+.tips li.hd{background:none;border:0;padding:8px 0 0;color:var(--dim);font-size:13px;font-weight:600}
+.tips b{display:block;font-size:15px}.tips small{display:block;color:var(--dim);font-size:13px;margin-top:2px}
+.ropt{display:block;width:100%;text-align:left;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.06);color:#fff;border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font:inherit}
+.ropt.on{border-color:var(--y)}.ropt b{display:block;font-size:15px}.ropt small{display:block;color:var(--dim);font-size:13px;margin-top:2px}
+.set{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px;gap:12px}.set small{display:block;color:var(--dim);font-size:12.5px}
+.sw{position:relative;width:51px;height:31px;flex:none}.sw input{opacity:0;width:0;height:0}.sw span{position:absolute;inset:0;background:rgba(255,255,255,.2);border-radius:31px;transition:background .25s}
+.sw span::after{content:"";position:absolute;left:2px;top:2px;width:27px;height:27px;border-radius:50%;background:#fff;transition:transform .3s var(--ease);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.sw input:checked+span{background:var(--g)}.sw input:checked+span::after{transform:translateX(20px)}
+.btn{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;font:600 15px -apple-system,sans-serif;min-height:44px;padding:0 14px;border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:1}
+.btn.pri{background:var(--y);color:#000}
+.row{display:flex;gap:8px;margin-top:10px}
+.train{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center}.train canvas{width:96px;height:128px;border-radius:8px;background:#000}
+.big{font-size:30px;font-weight:700;line-height:1}.hint{color:var(--dim);font-size:13px;margin:6px 0 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px;margin-top:6px}.kv span:nth-child(odd){color:var(--dim)}
+.prog{height:4px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden;margin-top:10px}.prog i{display:block;height:100%;width:0;background:var(--y)}
+h3{font-size:15px;margin:10px 0 8px}
+#viewer{position:fixed;inset:0;background:#000;display:none;place-items:center;z-index:9;padding:20px;text-align:center}#viewer.show{display:grid}
+#viewer img{max-width:100%;max-height:74dvh;border-radius:6px;-webkit-touch-callout:default;-webkit-user-select:auto}
+#viewer p{color:var(--dim);font-size:14px}
 .hidden{display:none!important}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
- <div class="top"><h1>構圖<b>教練</b> Live</h1>
-  <div class="seg" role="tablist"><button id="mP" class="on">人像</button><button id="mL">風景</button></div></div>
-
- <section class="vf">
-  <div class="stage" id="stage">
-   <div class="empty" id="empty">按「開始取景」打開相機<br><small>或用「分析照片」先試試看</small></div>
-   <video id="vid" class="hidden" playsinline muted></video>
-   <canvas id="still" class="still hidden"></canvas>
-   <canvas id="ov"></canvas>
-   <div class="status" id="status">載入偵測模型中…</div>
-   <div class="badge num hidden" id="badge"></div>
-   <div class="guide hidden" id="guide"></div>
-  </div>
-  <div class="row" style="align-items:center">
-   <button class="btn pri" id="startBtn">開始取景</button>
-   <button class="shutter" id="shutter" aria-label="拍攝"></button>
-   <label class="btn">分析照片<input id="testIn" type="file" accept="image/*" capture="environment" hidden></label>
-  </div>
-  <div class="row"><button class="btn" id="levelBtn">開啟水平儀</button><button class="btn" id="flipBtn">切換前／後鏡頭</button></div>
-  <label class="rec" id="recBox"><span>拍法</span><select id="recSel"></select></label>
-  <div class="steps" id="steps"></div>
-  <p class="hint" id="note"></p>
- </section>
-
- <section>
-  <div class="panel">
-   <h2 id="tipT">即時建議・人像</h2>
-   <ul class="tips" id="tips"><li>開始取景後，這裡會即時更新建議。</li></ul>
-  </div>
-  <div class="panel" style="margin-top:14px">
-   <h2 id="trT">訓練：人像模型</h2>
-   <div class="train">
-    <canvas id="heat" width="120" height="160"></canvas>
-    <div><div class="big num" id="trN">0</div><div class="hint" style="margin:0">張參考照片</div>
-     <div class="kv" id="trKV"></div></div>
-   </div>
-   <div class="prog"><i id="trBar"></i></div>
-   <div class="row">
-    <label class="btn pri">加入參考照片<input id="trIn" type="file" accept="image/*" multiple hidden></label>
-    <button class="btn" id="trClr">清除此模型</button>
-   </div>
-   <p class="hint" id="trHint">選一批你覺得構圖好的人像照片（建議 20 張以上）。系統會學這些照片的眼睛高度、臉部位置和人物大小；照片越多，建議越像你要的風格。人像和風景分開訓練。</p>
-  </div>
- </section>
+<div id="app">
+ <div class="top">
+  <button class="ic" id="more" aria-label="詳細建議與設定"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
+  <div id="status">載入 AI 偵測中…</div>
+  <div id="lvl"></div>
+ </div>
+ <div class="vfwrap"><div class="vf" id="stage">
+  <video id="vid" playsinline muted autoplay></video>
+  <canvas id="ov"></canvas>
+  <div id="chip"></div>
+  <div id="poseToast"></div>
+  <div id="cover"><div><div class="go"><i></i></div><b>點一下開始取景</b><p id="coverMsg">第一次會詢問相機與動作感測（水平儀）權限，請按「允許」</p></div></div>
+ </div></div>
+ <div class="guide"><div id="pill"><b></b><small></small></div></div>
+ <div class="poses" id="poses"></div>
+ <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button></div></div>
+ <div class="ctrl">
+  <button id="thumb" aria-label="看剛拍的照片"></button>
+  <button id="shutter" aria-label="拍照"><i></i></button>
+  <div class="rgt"><button class="ic" id="flip" aria-label="切換前後鏡頭"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></svg></button></div>
+ </div>
+ <p id="note" class="hidden"></p>
 </div>
-<div class="modal" id="modal"><div><img id="outImg" alt="拍攝成品"><p>長按圖片 →「加入照片」存到相簿</p><button class="btn" id="closeM">繼續拍</button></div></div>
+
+<div id="sheet">
+ <div id="grab"><i></i></div>
+ <div class="stabs"><button class="stab on" data-t="pTips">建議</button><button class="stab" data-t="pRec">拍法</button><button class="stab" data-t="pTrain">訓練</button><button class="stab" data-t="pSet">設定</button></div>
+ <div class="sbody">
+  <div id="pTips"><ul class="tips" id="tips"><li>開始取景後，這裡會列出所有建議。</li></ul></div>
+  <div id="pRec" class="hidden"><div id="recPane"><h3>人像拍法</h3><div id="recSel"></div><p class="hint">置中全身、三分法人像、半身特寫、環境人像參考 slay composition guides（CC BY 4.0，slaycamera.com）。</p></div></div>
+  <div id="pTrain" class="hidden">
+   <h3 id="trT">訓練：人像模型</h3>
+   <div class="train"><canvas id="heat" width="120" height="160"></canvas><div><div class="big" id="trN">0</div><div class="hint" style="margin:0">張參考照片</div><div class="kv" id="trKV"></div></div></div>
+   <div class="prog"><i id="trBar"></i></div>
+   <div class="row"><label class="btn pri">加入參考照片<input id="trIn" type="file" accept="image/*" multiple hidden></label><button class="btn" id="trClr">清除</button></div>
+   <p class="hint" id="trHint">從相簿選一批你喜歡的照片，系統會學它們的構圖。人像和風景分開訓練（看目前在哪個模式）。</p>
+  </div>
+  <div id="pSet" class="hidden">
+   <label class="set"><span>格線<small>三分法輔助線</small></span><span class="sw"><input type="checkbox" id="gridOn"><span></span></span></label>
+   <label class="set"><span>水平儀方向反轉<small>如果手機往右歪、水平儀卻往左，就打開這個</small></span><span class="sw"><input type="checkbox" id="flipLv"><span></span></span></label>
+   <p class="hint">水平儀使用手機內建的重力感測器。白色人形是建議的站位與姿勢；人形的某一段變綠，代表那個部位已經對齊。</p>
+  </div>
+ </div>
+</div>
+<div id="sheetBg"></div>
+<div id="viewer"><div><img id="outImg" alt="剛拍的照片"><p>長按照片 →「加入照片」存到相簿</p><button class="btn" id="closeV" style="max-width:200px">完成</button></div></div>
 
 <script type="module">
 const $=id=>document.getElementById(id);
-const vid=$('vid'),ov=$('ov'),oc=ov.getContext('2d'),still=$('still');
+const vid=$('vid'),ov=$('ov'),oc=ov.getContext('2d');
 const P3=[1/3,2/3];
-let mode='portrait',stream=null,facing='environment',face=null,pose=null,running=false,tilt=null,frameSrc=null;
+let mode='portrait',stream=null,facing='environment',face=null,pose=null,running=false,tilt=null;
 
 
 const RECIPES={
@@ -139,12 +175,12 @@ let mpOK=false;
  const fs=await V.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
  face=await V.FaceLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numFaces:3});
  pose=await V.PoseLandmarker.createFromOptions(fs,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',delegate:'GPU'},runningMode:'VIDEO',numPoses:1});
- mpOK=true;$('status').textContent='AI 人臉＋骨架偵測：已啟用'}
- catch(e){$('status').textContent='簡易偵測模式（膚色＋對比）';$('note').textContent='這個環境載不到 AI 偵測模型，目前用簡易偵測。放到自己的網址開啟，就會自動啟用人臉＋骨架偵測。'}})();
+ mpOK=true;$('status').textContent='AI 偵測已啟用';$('status').classList.add('ai')}
+ catch(e){$('status').textContent='簡易偵測模式';$('note').textContent='這個環境載不到 AI 偵測模型，目前用簡易偵測。放到自己的網址開啟，就會自動啟用人臉＋骨架偵測。'}})();
 let ts=0;const nextTs=()=>(ts=Math.max(ts+1,performance.now()));
 async function setMode(m){if(face){await face.setOptions({runningMode:m});await pose.setOptions({runningMode:m})}}
 
-function lumGrid(src,W){const H=Math.round(W*(src.videoHeight||src.height)/(src.videoWidth||src.width)),c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(src,0,0,W,H);return{W,H,d:x.getImageData(0,0,W,H).data}}
+const _lc=document.createElement('canvas'),_lx=_lc.getContext('2d',{willReadFrequently:true});function lumGrid(src,W){const H=Math.round(W*(src.videoHeight||src.height)/(src.videoWidth||src.width));if(_lc.width!==W||_lc.height!==H){_lc.width=W;_lc.height=H}_lx.drawImage(src,0,0,W,H);return{W,H,d:_lx.getImageData(0,0,W,H).data}}
 const L=(d,i)=>(.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/255;
 
 /* face via MediaPipe or skin heuristic */
@@ -254,52 +290,7 @@ function guidePortrait(r,live){const lm=learned(),a=advisePortrait(r,lm),list=st
 function guideLand(s,live){const lm=learned(),a=adviseLand(s,lm,tilt),list=stable(a.list,live),ready=!list.some(i=>i.p>=45);
  return{list,ready,msg:ready?'✓ 可以拍了':list[0].act.split('：')[0],target:a.th!=null?{hy:a.th}:null,sal:{x:s.sx,y:s.sy},hy:s.hy,ang:s.ang}}
 
-/* ---------- drawing ---------- */
-function fit(el){const r=el.getBoundingClientRect(),st=$('stage').getBoundingClientRect(),dpr=devicePixelRatio||1;Object.assign(ov.style,{left:r.left-st.left+'px',top:r.top-st.top+'px',width:r.width+'px',height:r.height+'px'});ov.width=r.width*dpr;ov.height=r.height*dpr;oc.setTransform(dpr,0,0,dpr,0,0);return[r.width,r.height]}
-function draw(el,g,mirror){const[W,H]=fit(el);oc.clearRect(0,0,W,H);const X=x=>(mirror?1-x:x)*W;
- oc.strokeStyle='rgba(255,255,255,.3)';oc.lineWidth=1;oc.beginPath();for(const p of P3){oc.moveTo(W*p,0);oc.lineTo(W*p,H);oc.moveTo(0,H*p);oc.lineTo(W,H*p)}oc.stroke();
- const good=g.ready,col=good?'#4ade80':'#ffd23f';
- if(mode==='portrait'&&g.cur){oc.setLineDash([6,6]);oc.strokeStyle='rgba(74,222,128,.9)';oc.lineWidth=2;oc.beginPath();oc.arc(X(g.target.x),g.target.y*H,22,0,7);oc.stroke();oc.setLineDash([]);
-  oc.strokeStyle=col;oc.lineWidth=3;oc.beginPath();oc.arc(X(g.cur.x),g.cur.y*H,14,0,7);oc.stroke();if(!good){arrowLine(X(g.cur.x),g.cur.y*H,X(g.target.x),g.target.y*H,col)}}
- if(mode==='landscape'){if(g.hy!=null&&g.target){const a=Math.tan((g.ang||0)/57.3)*W/2;oc.strokeStyle=col;oc.lineWidth=3;oc.beginPath();oc.moveTo(0,g.hy*H-a);oc.lineTo(W,g.hy*H+a);oc.stroke();oc.setLineDash([8,6]);oc.strokeStyle='rgba(74,222,128,.9)';oc.lineWidth=2;oc.beginPath();oc.moveTo(0,g.target.hy*H);oc.lineTo(W,g.target.hy*H);oc.stroke();oc.setLineDash([])}
-  if(g.sal){oc.strokeStyle='rgba(255,255,255,.8)';oc.lineWidth=2;oc.beginPath();oc.arc(X(g.sal.x),g.sal.y*H,10,0,7);oc.stroke()}
-  if(tilt!=null){oc.strokeStyle=Math.abs(tilt)<1.2?'#4ade80':'#ff5a4e';oc.lineWidth=2;oc.save();oc.translate(W/2,H/2);oc.rotate(-tilt/57.3);oc.beginPath();oc.moveTo(-60,0);oc.lineTo(-20,0);oc.moveTo(20,0);oc.lineTo(60,0);oc.stroke();oc.restore()}}}
-function arrowLine(x1,y1,x2,y2,c){const a=Math.atan2(y2-y1,x2-x1),d=Math.hypot(x2-x1,y2-y1);if(d<26)return;const sx=x1+Math.cos(a)*18,sy=y1+Math.sin(a)*18,ex=x2-Math.cos(a)*24,ey=y2-Math.sin(a)*24;oc.strokeStyle=c;oc.lineWidth=3;oc.beginPath();oc.moveTo(sx,sy);oc.lineTo(ex,ey);oc.lineTo(ex-12*Math.cos(a-.5),ey-12*Math.sin(a-.5));oc.moveTo(ex,ey);oc.lineTo(ex-12*Math.cos(a+.5),ey-12*Math.sin(a+.5));oc.stroke()}
-function show(g){$('badge').classList.remove('hidden');$('badge').textContent=g.ready?'可以拍':(g.shot?SHOT[g.shot]+' · ':'')+'還有 '+g.list.filter(i=>i.p>=45).length+' 項';$('badge').style.color=g.ready?'#4ade80':'#fff';$('badge').style.fontSize='15px';
- $('guide').classList.remove('hidden');$('guide').textContent=g.msg;$('guide').style.color=g.ready?'#4ade80':'#fff';$('shutter').classList.toggle('ready',g.ready);
- const sec=(who,t)=>{const l=g.list.filter(i=>i.who===who);return l.length?`<li class="hd">${t}</li>`+l.slice(0,4).map(i=>`<li class="${i.p>=45?'bad':''}"><b>${i.act}</b><small>${i.why}</small></li>`).join(''):''};
- $('tips').innerHTML=(g.ready?'<li class="good"><b>構圖和姿勢都到位了，直接拍吧</b><small>建議連拍幾張，挑表情最自然的那一張</small></li>':'')+sec('cam','📷 拍照的人')+sec('model','🧍 被拍的人')}
 
-/* ---------- live loop ---------- */
-let lastRun=0;function loop(t){if(!running)return;if(vid.readyState>=2&&t-lastRun>120){lastRun=t;try{const g=mode==='portrait'?guidePortrait(detectPeople(vid,false),true):guideLand(detectScene(vid),true);show(g);draw(vid,g,facing==='user')}catch(e){console.log(e)}}requestAnimationFrame(loop)}
-async function start(){try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1920},height:{ideal:1440}},audio:false});vid.srcObject=stream;vid.style.transform=facing==='user'?'scaleX(-1)':'';await vid.play();
- if(face)await setMode('VIDEO');$('empty').classList.add('hidden');still.classList.add('hidden');vid.classList.remove('hidden');$('startBtn').textContent='停止取景';running=true;requestAnimationFrame(loop)}
- catch(e){$('note').textContent='無法開啟即時相機：這個檢視環境擋掉了相機權限。請把 HTML 檔放到自己的網址（https），再用 iPhone Safari 開啟並允許相機；現在可以先用「分析照片」。'}}
-function stop(){running=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('startBtn').textContent='開始取景'}
-$('startBtn').onclick=()=>stream?stop():start();
-$('flipBtn').onclick=()=>{facing=facing==='environment'?'user':'environment';if(stream)start()};
-$('shutter').onclick=()=>{let c;if(stream&&vid.videoWidth){c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;const x=c.getContext('2d');if(facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(vid,0,0)}else if(!still.classList.contains('hidden'))c=still;if(!c)return;c.toBlob(b=>{$('outImg').src=URL.createObjectURL(b);$('modal').classList.add('show')},'image/jpeg',.93)};
-$('closeM').onclick=()=>$('modal').classList.remove('show');
-
-/* level (iOS needs permission; only works when hosted) */
-$('levelBtn').onclick=async()=>{try{if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){const p=await DeviceOrientationEvent.requestPermission();if(p!=='granted')throw 0}
- addEventListener('deviceorientation',e=>{if(e.gamma==null)return;const portraitUI=innerHeight>innerWidth;tilt=portraitUI?e.gamma:e.beta;if(Math.abs(tilt)>45)tilt=null});$('levelBtn').textContent='水平儀已開啟'}catch(e){$('note').textContent='水平儀需要在自己的網址開啟才能用，目前改用畫面中的地平線判斷傾斜。'}};
-
-/* still image analysis */
-async function loadImg(file){return new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)})}
-$('testIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;stop();const img=await loadImg(f),k=Math.min(1,1600/Math.max(img.width,img.height));still.width=img.width*k;still.height=img.height*k;still.getContext('2d').drawImage(img,0,0,still.width,still.height);
- $('empty').classList.add('hidden');vid.classList.add('hidden');still.classList.remove('hidden');if(face)await setMode('IMAGE');
- const g=mode==='portrait'?guidePortrait(detectPeople(still,true)):guideLand(detectScene(still));show(g);draw(still,g,false);frameSrc=still};
-
-/* ---------- training ---------- */
-$('trIn').onchange=async e=>{const files=[...e.target.files];if(!files.length)return;const wasRun=running;running=false;if(face)await setMode('IMAGE');let ok=0;
- for(let i=0;i<files.length;i++){$('trBar').style.width=((i+1)/files.length*100)+'%';$('trHint').textContent=`分析中 ${i+1}/${files.length}…`;try{const img=await loadImg(files[i]),c=document.createElement('canvas'),k=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-   if(mode==='portrait'){const r=detectPeople(c,true);if(r.f){const ft=r.kp&&r.kp[27]&&r.kp[27].visibility>.5?+Math.max(r.kp[27].y,r.kp[28]?r.kp[28].y:0).toFixed(3):null;M.portrait.s.push({x:+r.f.cx.toFixed(3),eyeY:+r.f.eyeY.toFixed(3),size:+r.f.h.toFixed(3),footY:ft});ok++}}
-   else{const s=detectScene(c);M.landscape.s.push({hy:s.hy==null?null:+s.hy.toFixed(3),sx:+s.sx.toFixed(3),sy:+s.sy.toFixed(3)});ok++}
-   URL.revokeObjectURL(img.src)}catch(err){}await new Promise(r=>setTimeout(r,0))}
- M[mode].s=M[mode].s.slice(-500);saveM();$('trHint').textContent=`完成：${files.length} 張中有 ${ok} 張可以使用${mode==='portrait'&&ok<files.length?'（其餘找不到人臉）':''}。即時建議已更新成你的風格。`;
- if(face&&wasRun)await setMode('VIDEO');running=wasRun;if(wasRun)requestAnimationFrame(loop);renderTrain()};
-$('trClr').onclick=()=>{M[mode].s=[];saveM();renderTrain();$('trBar').style.width='0'};
 function renderTrain(){const s=M[mode].s,lm=learned(),h=$('heat'),x=h.getContext('2d');$('trN').textContent=s.length;$('trT').textContent='訓練：'+(mode==='portrait'?'人像模型':'風景模型');
  x.fillStyle='#000';x.fillRect(0,0,120,160);x.strokeStyle='rgba(255,255,255,.25)';x.beginPath();for(const p of P3){x.moveTo(120*p,0);x.lineTo(120*p,160);x.moveTo(0,160*p);x.lineTo(120,160*p)}x.stroke();
  if(mode==='portrait'){x.fillStyle='rgba(255,210,63,.35)';for(const o of s){x.beginPath();x.arc(o.x*120,o.eyeY*160,4,0,7);x.fill()}x.strokeStyle='#4ade80';x.beginPath();x.moveTo(0,lm.eyeY*160);x.lineTo(120,lm.eyeY*160);x.stroke();
@@ -309,14 +300,194 @@ function renderTrain(){const s=M[mode].s,lm=learned(),h=$('heat'),x=h.getContext
   $('trKV').innerHTML=`<span>低地平線</span><span class="num">${Math.round(lm.low*100)}%</span><span>高地平線</span><span class="num">${Math.round(lm.high*100)}%</span><span>偏好低線</span><span class="num">${Math.round(lm.pLow*100)}%</span><span>來源</span><span>${s.length>=3?'你的訓練照片':'內建三分法規則'}</span>`;
   if(!s.length)$('trHint').textContent='選一批你喜歡的風景照片。系統會學地平線放多高、主體放在哪裡。和人像模型分開訓練。'}}
 
-/* mode switch */
-function setUIMode(m){mode=m;$('mP').classList.toggle('on',m==='portrait');$('mL').classList.toggle('on',m==='landscape');$('tipT').textContent='即時建議・'+(m==='portrait'?'人像':'風景');$('recBox').classList.toggle('hidden',m!=='portrait');$('steps').classList.toggle('hidden',m!=='portrait');$('trBar').style.width='0';renderTrain();
- if(!running&&!still.classList.contains('hidden')){const g=m==='portrait'?guidePortrait(detectPeople(still,true)):guideLand(detectScene(still));show(g);draw(still,g,false)}}
-$('mP').onclick=()=>setUIMode('portrait');$('mL').onclick=()=>setUIMode('landscape');
-function renderRecipe(){const R=RECIPES[recipe];$('steps').innerHTML=R.steps.map((t,i)=>`<span>${i+1}. ${t}</span>`).join('')+(recipe!=='auto'&&recipe!=='legs'?'<div class="credit" style="flex-basis:100%">拍法參考 <a href="https://www.slaycamera.com/" target="_blank" rel="noopener">slay composition guides</a>（CC BY 4.0）</div>':'')}
-$('recSel').innerHTML=Object.entries(RECIPES).map(([k,v])=>`<option value="${k}" ${k===recipe?'selected':''}>${v.n}</option>`).join('');
-$('recSel').onchange=e=>{recipe=e.target.value;try{localStorage.setItem('fc_recipe',recipe)}catch(err){}renderRecipe();renderTrain()};
-renderTrain();renderRecipe();
+
+/* =================== UI layer (iOS-camera style) =================== */
+const stage=$('stage');
+let roll=null,rollRaw=null,flipLevel=false,showGrid=true,lastG=null,poseId='stand45',lastShot=null;
+try{flipLevel=localStorage.getItem('fc_flip')==='1';const p=localStorage.getItem('fc_pose');if(p)poseId=p;showGrid=localStorage.getItem('fc_grid')!=='0'}catch(e){}
+
+/* ---------- pose templates: image space, hip-mid origin, torso length = 1, y down. L/R = display left/right ---------- */
+// order: nose, shL, shR, elL, elR, wrL, wrR, hipL, hipR, knL, knR, anL, anR
+const POSES={
+ none:{n:'只看站位',d:'自然站好，對齊人形的位置',p:[[0,-1.45],[-.4,-1],[.4,-1],[-.46,-.45],[.46,-.45],[-.44,.05],[.44,.05],[-.2,0],[.2,0],[-.2,.95],[.2,.95],[-.2,1.9],[.2,1.9]],h:{},free:true},
+ stand45:{n:'側身 45°',d:'身體側轉、重心放後腳、前腳微彎、一手叉腰',p:[[.05,-1.45],[-.27,-1],[.27,-1],[-.35,-.44],[.6,-.56],[-.3,.06],[.2,-.12],[-.15,0],[.15,0],[-.2,.95],[.08,.92],[-.22,1.9],[-.04,1.86]],
+  h:{armL:'自然垂放、手肘微彎',armR:'手輕輕叉在腰上，手肘往外',legL:'站直當重心腳',legR:'膝蓋往內彎、腳尖點地，放在重心腳前面'},turn:.54},
+ hair:{n:'單手撩髮',d:'一手撩頭髮、另一手放鬆、重心放一腳',p:[[0,-1.45],[-.38,-1],[.38,-1],[-.44,-.44],[.66,-1.42],[-.38,.06],[.16,-1.62],[-.2,0],[.2,0],[-.22,.95],[.14,.93],[-.22,1.9],[.06,1.86]],
+  h:{armL:'自然垂放',armR:'手抬起來，手指輕輕撥頭髮，手肘往外打開',legL:'站直當重心腳',legR:'膝蓋微彎往內收'},turn:.76},
+ pocket:{n:'插口袋交叉腳',d:'雙手插口袋、手肘往外、兩腳交叉',p:[[0,-1.45],[-.38,-1],[.38,-1],[-.62,-.48],[.62,-.48],[-.3,-.04],[.3,-.04],[-.18,0],[.18,0],[-.06,.95],[.1,.95],[.12,1.88],[-.08,1.9]],
+  h:{armL:'手插口袋，手肘往外打開',armR:'手插口袋，手肘往外打開',legL:'這隻腳往另一邊交叉過去',legR:'站直，讓另一隻腳交叉在前面'},turn:.76},
+ walk:{n:'自然走路',d:'朝鏡頭走過來、手自然擺動，連拍抓瞬間',p:[[0,-1.45],[-.36,-1],[.36,-1],[-.5,-.48],[.42,-.5],[-.42,.02],[.5,-.02],[-.18,0],[.18,0],[-.24,.9],[.14,.82],[-.3,1.85],[.12,1.7]],
+  h:{armL:'手往後自然擺',armR:'手往前自然擺',legL:'後腳伸直',legR:'前腳往前跨、膝蓋微彎'},turn:.72},
+};
+const LIMBS=[['armL',1,3],['armL',3,5],['armR',2,4],['armR',4,6],['legL',7,9],['legL',9,11],['legR',8,10],['legR',10,12]];
+const ARMNAME={armL:'手',armR:'手',legL:'腳',legR:'腳'};
+
+/* ---------- ghost placement (where the subject should stand) ---------- */
+function ghostPlace(lm,shot,personX){const P=POSES[poseId];const half=recipe==='tele'||(recipe==='auto'&&(shot==='half'||shot==='close'));
+ let tx=.5;if(lm.off>=.2)tx=personX!=null&&personX>.5?.5+lm.off:.5-lm.off;else if(recipe==='thirds')tx=personX!=null&&personX>.5?2/3:1/3;
+ if(half){const s=(1.05-lm.eyeY)/1.55;return{s,ox:tx,oy:1.05,half:true,P}}
+ const top={legs:.13,center:.2,thirds:.24,env:.3,auto:.14}[recipe]||.14,foot=recipe==='env'?.9:lm.footY;const s=(foot-top)/3.68;return{s,ox:tx,oy:top+1.78*s,half:false,P}}
+const gpt=(g,p)=>({x:g.ox+p[0]*g.s/.75,y:g.oy+p[1]*g.s});
+
+/* ---------- person in display space, mapped onto template order ---------- */
+function personPts(kp,mirror){if(!kp)return null;const D=i=>kp[i]&&kp[i].visibility>.45?{x:mirror?1-kp[i].x:kp[i].x,y:kp[i].y}:null;
+ const A={sh:D(11),el:D(13),wr:D(15),hip:D(23),kn:D(25),an:D(27)},B={sh:D(12),el:D(14),wr:D(16),hip:D(24),kn:D(26),an:D(28)};
+ if(!A.sh||!B.sh)return null;const aLeft=A.sh.x<B.sh.x,Lc=aLeft?A:B,Rc=aLeft?B:A;
+ return{pts:[D(0),Lc.sh,Rc.sh,Lc.el,Rc.el,Lc.wr,Rc.wr,Lc.hip,Rc.hip,Lc.kn,Rc.kn,Lc.an,Rc.an],side:{L:aLeft?'左':'右',R:aLeft?'右':'左'}}}
+
+/* ---------- compare person with ghost: placement + per-limb pose ---------- */
+function matchPose(per,g,mirror){const out={limbs:new Array(8).fill(null),items:[],placed:false,posed:false};if(!per)return out;const q=per.pts,T=g.P.p;
+ const mid=(a,b)=>a&&b?{x:(a.x+b.x)/2,y:(a.y+b.y)/2}:null,ph=mid(q[7],q[8]),ps=mid(q[1],q[2]),gh=gpt(g,[0,0]),gs=gpt(g,[0,-1]);
+ const anchorP=ph||ps,anchorG=ph?gh:gs;if(!anchorP)return out;
+ const torso=ph&&ps?Math.abs(ph.y-ps.y):null,ratio=torso?torso/g.s:1;
+ const dxT=(anchorP.x-anchorG.x)*.75/g.s,dyT=(anchorP.y-anchorG.y)/g.s;
+ // horizontal: the subject walks into the ghost
+ if(Math.abs(dxT)>.45){const dir=anchorP.x>anchorG.x?'左':'右',steps=Math.max(1,Math.round(Math.abs(dxT)*.5/.55));
+  const theirs=mirror?dir:(dir==='左'?'右':'左');out.items.push({k:'place',p:86,who:'model',act:`主角往畫面${dir}邊走 ${steps} 步`,why:`站進白色人形裡（往${mirror?'你':'他'}的${theirs}手邊）`})}
+ // size: photographer distance
+ if(!g.half&&torso){if(ratio>1.18)out.items.push({k:'dist',p:84,who:'cam',act:ratio>1.45?'拍照的人退後兩大步':'拍照的人退後一步',why:'人比白色人形大，全身會放不下'});
+  else if(ratio<.82)out.items.push({k:'dist',p:84,who:'cam',act:ratio<.6?'拍照的人往前走兩步':'拍照的人往前一步',why:'人比白色人形小，主角不夠突出'})}
+ if(Math.abs(dyT)>.35)out.items.push({k:'tiltv',p:82,who:'cam',act:dyT>0?'鏡頭往下壓一點':'鏡頭往上抬一點',why:'讓主角的身體對齊白色人形的高度'});
+ out.placed=!out.items.length;
+ // pose: limb directions
+ if(g.P.free){out.posed=true;return out}
+ let worst=null;LIMBS.forEach(([grp,a,b],i)=>{if(!q[a]||!q[b])return;const vx=(q[b].x-q[a].x)*.75,vy=q[b].y-q[a].y,tx=T[b][0]-T[a][0],ty=T[b][1]-T[a][1];
+  let d=Math.abs(Math.atan2(vy,vx)-Math.atan2(ty,tx))*57.3;if(d>180)d=360-d;out.limbs[i]=d<28;if(d>38&&(!worst||d>worst.d))worst={d,grp}});
+ const seenL=out.limbs.filter(v=>v!==null).length,okL=out.limbs.filter(v=>v).length;
+ if(ps&&torso&&g.P.turn){const pw=Math.abs(q[1].x-q[2].x)*.75/torso,tw=Math.abs(T[1][0]-T[2][0]);
+  if(pw>tw*1.3)out.items.push({k:'turn',p:60,who:'model',act:'身體再側轉一點',why:g.P.turn<.6?'轉到大約 45°，肩膀斜斜的會顯瘦':'肩膀稍微斜一點比較自然'});
+  else if(pw<tw*.65)out.items.push({k:'turn',p:60,who:'model',act:'身體轉回來一點，面向鏡頭',why:'轉太多會看不到臉和身形'})}
+ if(worst){const side=worst.grp.endsWith('L')?per.side.L:per.side.R;out.items.push({k:'limb',p:58,who:'model',act:`${side}${ARMNAME[worst.grp]}：${g.P.h[worst.grp]}`,why:'照著人形裡沒變綠的那一段調整'})}
+ out.posed=seenL>=4&&okL>=seenL-1&&!out.items.some(i=>i.k==='turn');return out}
+
+/* ---------- level from the phone's own gravity sensor ---------- */
+const isIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function onMotion(e){const g=e.accelerationIncludingGravity;if(!g||g.x==null)return;const mag=Math.hypot(g.x,g.y);if(mag<3){rollRaw=null;return}
+ let r=(isIOS?Math.atan2(g.x,-g.y):Math.atan2(-g.x,g.y))*57.3;if(flipLevel)r=-r;rollRaw=r;roll=roll==null||Math.abs(r-roll)>20?r:roll+(r-roll)*.18;
+ tilt=Math.abs(roll)<45?roll:null}
+async function enableMotion(){try{if(typeof DeviceMotionEvent!=='undefined'&&DeviceMotionEvent.requestPermission){const p=await DeviceMotionEvent.requestPermission();if(p!=='granted')return false}addEventListener('devicemotion',onMotion);return true}catch(e){return false}}
+
+/* ---------- canvas sizing (once per resize, not per frame) ---------- */
+let OW=0,OH=0,DPR=1;function sizeOv(){const r=vid.getBoundingClientRect(),st=stage.getBoundingClientRect();DPR=Math.min(3,devicePixelRatio||1);OW=r.width;OH=r.height;
+ Object.assign(ov.style,{left:r.left-st.left+'px',top:r.top-st.top+'px',width:OW+'px',height:OH+'px'});ov.width=OW*DPR;ov.height=OH*DPR}
+new ResizeObserver(()=>{if(stream)sizeOv()}).observe(stage);
+
+/* ---------- smoothing state for 60fps rendering ---------- */
+const SM={pts:null,ghost:null,limbs:new Array(8).fill(0),ready:0,hz:null};
+const lerp=(a,b,t)=>a+(b-a)*t;
+function smoothPts(target){if(!target){SM.pts=null;return}if(!SM.pts){SM.pts=target.map(p=>p&&{...p});return}SM.pts=target.map((p,i)=>!p?null:SM.pts[i]?{x:lerp(SM.pts[i].x,p.x,.35),y:lerp(SM.pts[i].y,p.y,.35)}:{...p})}
+
+/* ---------- detection loop (~12 fps, decoupled from drawing) ---------- */
+let busy=false,lastDet=0,state={g:null,m:null,ghost:null,per:null};
+function detectTick(){if(!running)return;const now=performance.now();if(!busy&&vid.readyState>=2&&now-lastDet>80){busy=true;lastDet=now;
+ try{const mirror=facing==='user';
+  if(mode==='portrait'){const r=detectPeople(vid,false),g=guidePortrait(r,true),lm=learned();lastShot=g.shot||lastShot;
+   const per=personPts(r.kp,mirror),px=per&&per.pts[1]&&per.pts[2]?(per.pts[1].x+per.pts[2].x)/2:null;const gh=ghostPlace(lm,lastShot,px),m=matchPose(per,gh,mirror);state={g,m,ghost:gh,per};updateGuide()}
+  else{const s=detectScene(vid),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}busy=false}
+ if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,40)}
+
+/* ---------- instruction pill: one clear action at a time ---------- */
+let pillText='',pillSince=0;
+function updateGuide(){const{g,m}=state;let items=[];
+ if(mode==='portrait'){const adv=g.list.filter(i=>i.p>=45&&!['square','legs','arms','posx','eyey','toosmall','feetlow'].includes(i.k));
+  if(!state.per&&!g.list.some(i=>i.k==='none'))items.push({k:'find',p:99,act:'讓主角整個人進到畫面',why:'需要看到肩膀和臀部，才能比對站位與姿勢'});
+  items=items.concat(adv,m?m.items:[]);
+  // camera-angle and fine framing advice from the trained model, once the subject stands in the ghost
+  if(m&&m.placed)items=items.concat(g.list.filter(i=>['lowangle','eyey','feetlow'].includes(i.k)&&i.p>=45));
+  items.sort((a,b)=>b.p-a.p);
+  const ready=state.per&&m&&m.placed&&(m.posed)&&!items.some(i=>i.p>=45&&!['limb','turn'].includes(i.k))&&!items.some(i=>i.k==='limb'||i.k==='turn');
+  setPill(ready?{act:'✓ 站位和姿勢都到位，拍！',why:'建議連拍幾張'}:items[0]||{act:'微調中…',why:''},ready,items[1]);
+  renderTips(items,g.list.filter(i=>i.p<45))}
+ else{const ready=g.ready;setPill(ready?{act:'✓ 水平與構圖到位，拍！',why:''}:g.list[0],ready,g.list[1]);renderTips(g.list,[])}}
+let pillTimer=0;function setPill(it,ready,next){const t=it?it.act:'';$('shutter').classList.toggle('ready',!!ready);
+ const wait=500-(performance.now()-pillSince);if(t!==pillText&&wait>0){clearTimeout(pillTimer);pillTimer=setTimeout(()=>setPill(it,ready,next),wait+10);return}
+ if(t!==pillText){pillText=t;pillSince=performance.now();const el=$('pill');el.classList.remove('in');void el.offsetWidth;el.querySelector('b').textContent=t;el.querySelector('small').textContent=it&&it.why||'';el.classList.toggle('ok',!!ready);el.classList.add('in')}
+ $('chip').textContent=next&&!ready?'接著：'+next.act.split('：')[0]:'';$('chip').classList.toggle('show',!!(next&&!ready))}
+function renderTips(items,minor){if(!$('sheet').classList.contains('open'))return;const li=(i)=>`<li class="${i.p>=45?'bad':''}"><b>${i.act}</b><small>${i.why||''}</small></li>`;
+ $('tips').innerHTML=(items.length?items.map(li).join(''):'<li class="good"><b>目前沒有需要調整的地方</b></li>')+(minor.length?'<li class="hd">小提醒</li>'+minor.map(li).join(''):'')}
+
+/* ---------- 60fps overlay drawing ---------- */
+function render(){requestAnimationFrame(render);if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
+ if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
+ const ready=$('shutter').classList.contains('ready');
+ if(mode==='portrait'&&state.ghost){const g=state.ghost;
+  // ghost silhouette (where to stand + which pose)
+  const T=g.P.p.map(p=>gpt(g,p));if(!SM.ghost)SM.ghost=T;SM.ghost=SM.ghost.map((p,i)=>({x:lerp(p.x,T[i].x,.15),y:lerp(p.y,T[i].y,.15)}));const G=SM.ghost.map(p=>({x:p.x*W,y:p.y*H})),lw=Math.max(10,g.s*H*.2);
+  const m=state.m;LIMBS.forEach((l,i)=>{SM.limbs[i]=lerp(SM.limbs[i],m&&m.limbs[i]?1:0,.15)});
+  c.lineCap='round';c.lineJoin='round';
+  const col=(k)=>{const t=ready?1:k;return`rgba(${Math.round(255-181*t)},${Math.round(255-33*t)},${Math.round(255-127*t)},`};
+  // torso
+  c.fillStyle=col(ready?1:0)+'.22)';c.strokeStyle=col(ready?1:0)+'.8)';c.lineWidth=2;c.beginPath();c.moveTo(G[1].x,G[1].y);c.lineTo(G[2].x,G[2].y);c.lineTo(G[8].x,G[8].y);c.lineTo(G[7].x,G[7].y);c.closePath();c.fill();c.stroke();
+  // head
+  const hr=g.s*H*.27;c.beginPath();c.arc(G[0].x,G[0].y-hr*.15,hr,0,7);c.fill();c.stroke();
+  // limbs: thick translucent capsule + outline, green when matched
+  LIMBS.forEach(([,a,b],i)=>{c.strokeStyle=col(SM.limbs[i])+'.28)';c.lineWidth=lw;c.beginPath();c.moveTo(G[a].x,G[a].y);c.lineTo(G[b].x,G[b].y);c.stroke();
+   c.strokeStyle=col(SM.limbs[i])+'.9)';c.lineWidth=2.5;c.beginPath();c.moveTo(G[a].x,G[a].y);c.lineTo(G[b].x,G[b].y);c.stroke()});
+  // feet marker: the exact spot to stand
+  if(!g.half){const fy=Math.max(G[11].y,G[12].y)+6;c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.setLineDash([6,5]);c.beginPath();c.ellipse((G[11].x+G[12].x)/2,fy,g.s*H*.55,g.s*H*.12,0,0,7);c.stroke();c.setLineDash([])}
+  // the real person's skeleton (smoothed)
+  smoothPts(state.per&&state.per.pts);if(SM.pts){const S=SM.pts;c.strokeStyle='rgba(255,210,63,.95)';c.lineWidth=3;c.beginPath();
+   for(const[a,b]of[[1,2],[1,7],[2,8],[7,8],[1,3],[3,5],[2,4],[4,6],[7,9],[9,11],[8,10],[10,12]])if(S[a]&&S[b]){c.moveTo(S[a].x*W,S[a].y*H);c.lineTo(S[b].x*W,S[b].y*H)}c.stroke();
+   c.fillStyle='#ffd23f';for(const p of S)if(p){c.beginPath();c.arc(p.x*W,p.y*H,3.5,0,7);c.fill()}}}
+ if(mode==='landscape'&&state.g){const g=state.g;if(g.hy!=null&&g.target){SM.hz=SM.hz==null?g.hy:lerp(SM.hz,g.hy,.2);const a=Math.tan((g.ang||0)/57.3)*W/2;
+   c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.beginPath();c.moveTo(0,SM.hz*H-a);c.lineTo(W,SM.hz*H+a);c.stroke();
+   c.setLineDash([8,6]);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2;c.beginPath();c.moveTo(0,g.target.hy*H);c.lineTo(W,g.target.hy*H);c.stroke();c.setLineDash([]);
+   c.font='600 13px -apple-system,"Noto Sans TC"';c.fillStyle='rgba(255,255,255,.9)';c.fillText('地平線放這裡',10,g.target.hy*H-8)}}
+ // iOS-style level: split line that merges and turns yellow when level
+ if(roll!=null){const cx=W/2,cy=H/2,lv=Math.abs(roll)<1;c.save();c.translate(cx,cy);
+  c.strokeStyle=lv?'#ffd23f':'rgba(255,255,255,.9)';c.lineWidth=lv?2:1.5;
+  if(lv){c.beginPath();c.moveTo(-70,0);c.lineTo(70,0);c.stroke()}
+  else{c.beginPath();c.moveTo(-70,0);c.lineTo(-28,0);c.moveTo(28,0);c.lineTo(70,0);c.stroke();c.rotate(-roll/57.3);c.strokeStyle='rgba(255,210,63,.95)';c.beginPath();c.moveTo(-28,0);c.lineTo(28,0);c.stroke()}
+  c.restore();$('lvl').textContent=(lv?'水平 ':'')+Math.abs(roll).toFixed(1)+'°';$('lvl').classList.toggle('lv',lv)}}
+requestAnimationFrame(render);
+
+/* ---------- camera ---------- */
+async function start(){$('cover').classList.add('gone');enableMotion();
+ try{if(stream)stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1440},height:{ideal:1920},aspectRatio:{ideal:3/4}},audio:false});
+  vid.srcObject=stream;vid.classList.toggle('mirror',facing==='user');await vid.play();if(face)await setMode('VIDEO');running=true;sizeOv();
+  if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else detectTick()}
+ catch(e){$('cover').classList.remove('gone');$('coverMsg').textContent='無法開啟相機：請到「設定 → Safari → 相機」改成「允許」，再點一次。'}}
+$('cover').onclick=start;
+$('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';SM.pts=null;if(stream)start()};
+let lastShot2=null;
+$('shutter').onclick=()=>{if(!stream||!vid.videoWidth)return;const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;const x=c.getContext('2d');if(facing==='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(vid,0,0);
+ stage.classList.remove('flash');void stage.offsetWidth;stage.classList.add('flash');
+ c.toBlob(b=>{if(lastShot2)URL.revokeObjectURL(lastShot2);lastShot2=URL.createObjectURL(b);$('thumb').style.backgroundImage=`url(${lastShot2})`;$('thumb').classList.add('has');$('outImg').src=lastShot2},'image/jpeg',.93)};
+$('thumb').onclick=()=>{if(lastShot2)$('viewer').classList.add('show')};$('closeV').onclick=()=>$('viewer').classList.remove('show');
+
+/* ---------- mode switch: tap or swipe like the iOS camera ---------- */
+function setUIMode(m){mode=m;document.querySelectorAll('.modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));$('modesTrack').style.transform=`translateX(${m==='portrait'?'-28px':'28px'})`;
+ $('poses').classList.toggle('hide',m!=='portrait');pillText='';state={g:null,m:null,ghost:null,per:null};SM.ghost=null;SM.pts=null;SM.hz=null;renderTrain&&renderTrain();$('recPane').classList.toggle('hidden',m!=='portrait')}
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
+let tx0=null;stage.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX},{passive:true});stage.addEventListener('touchend',e=>{if(tx0==null)return;const dx=e.changedTouches[0].clientX-tx0;tx0=null;if(Math.abs(dx)>60)setUIMode(dx<0?'portrait':'landscape')},{passive:true});
+
+/* ---------- pose picker with drawn thumbnails ---------- */
+function poseThumb(id){const c=document.createElement('canvas'),s=2;c.width=44*s;c.height=64*s;const x=c.getContext('2d');x.scale(s,s);const P=POSES[id].p,k=12.5,ox=22,oy=31;const Q=P.map(p=>[ox+p[0]*k,oy+p[1]*k]);
+ x.strokeStyle='#fff';x.fillStyle='#fff';x.lineCap='round';x.lineWidth=4;x.globalAlpha=.9;
+ for(const[,a,b]of LIMBS){x.beginPath();x.moveTo(...Q[a]);x.lineTo(...Q[b]);x.stroke()}x.beginPath();x.moveTo(...Q[1]);x.lineTo(...Q[2]);x.lineTo(...Q[8]);x.lineTo(...Q[7]);x.closePath();x.fill();x.beginPath();x.arc(Q[0][0],Q[0][1]-1,3.6,0,7);x.fill();return c.toDataURL()}
+$('poses').innerHTML=Object.entries(POSES).map(([id,p])=>`<button data-p="${id}" class="${id===poseId?'on':''}" aria-label="${p.n}"><img src="${poseThumb(id)}" alt=""><span>${p.n}</span></button>`).join('');
+$('poses').querySelectorAll('button').forEach(b=>b.onclick=()=>{poseId=b.dataset.p;try{localStorage.setItem('fc_pose',poseId)}catch(e){}$('poses').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});SM.limbs.fill(0);pillText='';
+ const el=$('poseToast');el.textContent=POSES[poseId].n+'：'+POSES[poseId].d;el.classList.remove('show');void el.offsetWidth;el.classList.add('show')});
+
+/* ---------- bottom sheet ---------- */
+const sheet=$('sheet');$('more').onclick=()=>{sheet.classList.add('open');updateGuide()};$('sheetBg').onclick=()=>sheet.classList.remove('open');
+let sy0=null;$('grab').addEventListener('touchstart',e=>{sy0=e.touches[0].clientY},{passive:true});$('grab').addEventListener('touchend',e=>{if(sy0!=null&&e.changedTouches[0].clientY-sy0>40)sheet.classList.remove('open');sy0=null},{passive:true});
+document.querySelectorAll('.stab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.stab').forEach(x=>{x.classList.toggle('on',x===t);$(x.dataset.t).classList.toggle('hidden',x!==t)})});
+$('recSel').innerHTML=Object.entries(RECIPES).map(([k,v])=>`<button class="ropt ${k===recipe?'on':''}" data-r="${k}"><b>${v.n}</b><small>${v.steps.join('・')||'依偵測到的全身／半身自動判斷'}</small></button>`).join('');
+$('recSel').querySelectorAll('.ropt').forEach(b=>b.onclick=()=>{recipe=b.dataset.r;try{localStorage.setItem('fc_recipe',recipe)}catch(e){}$('recSel').querySelectorAll('.ropt').forEach(x=>x.classList.toggle('on',x===b));SM.ghost=null;renderTrain()});
+$('flipLv').checked=flipLevel;$('flipLv').onchange=e=>{flipLevel=e.target.checked;roll=null;try{localStorage.setItem('fc_flip',flipLevel?'1':'0')}catch(err){}};
+$('gridOn').checked=showGrid;$('gridOn').onchange=e=>{showGrid=e.target.checked;try{localStorage.setItem('fc_grid',showGrid?'1':'0')}catch(err){}};
+
+/* ---------- training (per mode, on this device) ---------- */
+$('trIn').onchange=async e=>{const files=[...e.target.files];if(!files.length)return;const was=running;running=false;if(face)await setMode('IMAGE');let ok=0;
+ for(let i=0;i<files.length;i++){$('trBar').style.width=((i+1)/files.length*100)+'%';$('trHint').textContent=`分析中 ${i+1}/${files.length}…`;
+  try{const img=await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=URL.createObjectURL(files[i])});const c=document.createElement('canvas'),k=Math.min(1,800/Math.max(img.width,img.height));c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+   if(mode==='portrait'){const r=detectPeople(c,true);if(r.f){const ft=r.kp&&r.kp[27]&&r.kp[27].visibility>.5?+Math.max(r.kp[27].y,r.kp[28]?r.kp[28].y:0).toFixed(3):null;M.portrait.s.push({x:+r.f.cx.toFixed(3),eyeY:+r.f.eyeY.toFixed(3),size:+r.f.h.toFixed(3),footY:ft});ok++}}
+   else{const s=detectScene(c);M.landscape.s.push({hy:s.hy==null?null:+s.hy.toFixed(3),sx:+s.sx.toFixed(3),sy:+s.sy.toFixed(3)});ok++}URL.revokeObjectURL(img.src)}catch(err){}await new Promise(r=>setTimeout(r,0))}
+ M[mode].s=M[mode].s.slice(-500);saveM();$('trHint').textContent=`完成：${files.length} 張中有 ${ok} 張可以使用。`;if(face&&was)await setMode('VIDEO');running=was;if(was){if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else detectTick()}renderTrain()};
+$('trClr').onclick=()=>{M[mode].s=[];saveM();renderTrain();$('trBar').style.width='0'};
+setUIMode('portrait');
+
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>

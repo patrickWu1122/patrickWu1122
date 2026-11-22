@@ -94,9 +94,14 @@ h3{font-size:15px;margin:10px 0 8px}
 .tr{display:flex;align-items:center;gap:8px}.ic.on{background:var(--y)}.ic.on svg{stroke:#000}
 #recTime{position:absolute;left:50%;transform:translateX(-50%);pointer-events:none;background:var(--r);color:#fff;font:600 15px -apple-system,sans-serif;font-variant-numeric:tabular-nums;padding:3px 10px;border-radius:6px;opacity:0;transition:opacity .2s}#recTime.show{opacity:1}
 .top{position:relative}
-#zoom{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column-reverse;gap:6px;background:rgba(0,0,0,.35);border-radius:22px;padding:4px;z-index:2}
+#zoom{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:4px;touch-action:none;background:rgba(0,0,0,.35);border-radius:22px;padding:4px;z-index:2}
 #zoom button{appearance:none;border:0;width:36px;height:36px;border-radius:50%;background:rgba(30,30,30,.7);color:#fff;font:600 12px -apple-system,sans-serif;cursor:pointer;transition:transform .2s var(--ease),background .2s}
-#zoom button.on{color:var(--y);transform:scale(1.12);font-size:13px}
+#zoom button{width:30px;height:30px;font-size:11px;background:rgba(20,20,20,.55)}
+#zoom button.on{color:var(--y);transform:scale(1.25);font-size:12px;background:rgba(20,20,20,.75);margin:0 3px}
+#zdial{position:absolute;left:0;right:0;bottom:6px;height:92px;opacity:0;pointer-events:none;transition:opacity .25s var(--ease),transform .3s var(--ease);transform:translateY(8px);z-index:2}
+#zdial.show{opacity:1;transform:none}#zdial canvas{position:absolute;inset:0;width:100%;height:100%}
+#zdial b{position:absolute;left:50%;top:6px;transform:translateX(-50%);color:var(--y);font:600 15px -apple-system,sans-serif;font-variant-numeric:tabular-nums;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+body.zooming #zoom{opacity:0}#zoom{transition:opacity .2s}
 #zoomToast{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:600 28px -apple-system,sans-serif;color:var(--y);opacity:0;pointer-events:none;text-shadow:0 1px 6px rgba(0,0,0,.6)}#zoomToast.show{animation:zt 1s var(--ease) forwards}@keyframes zt{0%,60%{opacity:1}100%{opacity:0}}
 #expRow{position:absolute;left:12px;right:12px;bottom:14px;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:14px;padding:6px 12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:2;font-size:13px}#expRow.show{opacity:1;pointer-events:auto}#expRow input{flex:1;accent-color:var(--y)}#expRow b{font-variant-numeric:tabular-nums;width:34px;text-align:right}
 #chip{z-index:2}
@@ -174,7 +179,7 @@ body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{o
   <div id="count"></div>
   <div id="autoRing"></div>
   <button id="compChip"><span></span><i>✕</i></button>
-  <div id="zoom"></div><div id="zoomToast"></div>
+  <div id="zoom"></div><div id="zdial"><canvas id="zdc"></canvas><b id="zdv">1×</b></div>
   <div id="expRow"><span>曝光</span><input type="range" id="expSl" min="-2" max="2" step=".1" value="0"><b id="expV">0.0</b></div>
   <div id="poseToast"></div>
   <div id="cover"><div><b>按下方快門開始取景</b><p id="coverMsg">第一次會詢問相機權限，請按「允許」</p></div></div>
@@ -589,18 +594,34 @@ const wc=document.createElement('canvas');
 function applyDigital(){vid.style.transform=`${facing==='user'?'scaleX(-1) ':''}scale(${dz})`}
 async function findLenses(){try{const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==='videoinput');
  lens.ultra=d.find(x=>/ultra|超廣角/i.test(x.label))||null;lens.wide=d.find(x=>/back|後/i.test(x.label)&&!/ultra|tele|超廣角|望遠/i.test(x.label)&&!/dual|triple|雙|三/i.test(x.label))||null}catch(e){}}
-function zoomOpts(){const o=[];const hw=caps.zoom;if(facing==='environment'&&((hw&&hw.min<1)||lens.ultra))o.push(.5);o.push(1,1.5,2,3);return o}
-function renderZoom(){const o=zoomOpts(),near=o.reduce((a,b)=>Math.abs(b-zoomLv)<Math.abs(a-zoomLv)?b:a),f=z=>(z<1?'.5':(Math.round(z*10)/10).toString());
- $('zoom').innerHTML=o.map(z=>`<button data-z="${z}" class="${z===near?'on':''}">${z===near?f(zoomLv)+'×':f(z)}</button>`).join('');
- $('zoom').querySelectorAll('button').forEach(b=>b.onclick=()=>setZoom(+b.dataset.z))}
+function zoomOpts(){const o=[];const hw=caps.zoom;if(facing==='environment'&&((hw&&hw.min<1)||lens.ultra))o.push(.5);o.push(1,2,3);return o}
+const zfmt=z=>(z<1?'.5':(Math.round(z*10)/10).toString());
+function renderZoom(){const o=zoomOpts();let near=o[0];for(const z of o)if(zoomLv>=z-.05)near=z;
+ $('zoom').innerHTML=o.map(z=>`<button data-z="${z}" class="${z===near?'on':''}">${z===near?zfmt(zoomLv)+'×':zfmt(z)}</button>`).join('');$('zdv').textContent=zfmt(zoomLv)+'×'}
+// ---- iOS-style zoom dial: hold & drag on the zoom buttons, or pinch the viewfinder
+const ZMIN=()=>zoomOpts()[0],ZMAX=8,ZK=95;let dialT=0,zDrag=null;
+function drawDial(){const c=$('zdc'),r=c.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);if(c.width!==Math.round(r.width*d)){c.width=r.width*d;c.height=r.height*d}const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.clearRect(0,0,r.width,r.height);
+ const cx=r.width/2,base=r.height-14,R0=r.width*1.1;const g=x.createRadialGradient(cx,base+R0,R0*.8,cx,base+R0,R0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=g;x.fillRect(0,0,r.width,r.height);
+ const vals=[];for(let v=Math.round(ZMIN()*10);v<=ZMAX*10;v++)vals.push(v/10);
+ for(const v of vals){const dx=(Math.log(v)-Math.log(zoomLv))*ZK;if(Math.abs(dx)>cx)continue;const a=dx/R0,px=cx+Math.sin(a)*R0,py=base+R0-Math.cos(a)*R0;const major=[.5,1,2,3,5,8].includes(v),mid=!major&&Math.abs(v*2-Math.round(v*2))<.01;
+  const len=major?12:mid?8:5;x.strokeStyle=major?'#fff':'rgba(255,255,255,.55)';x.lineWidth=major?1.6:1;x.beginPath();x.moveTo(px,py);x.lineTo(px-Math.sin(a)*0+0,py-len);x.stroke();
+  if(major){x.fillStyle='#fff';x.font='600 11px -apple-system,sans-serif';x.textAlign='center';x.fillText(zfmt(v)+'×',px,py-len-5)}}
+ x.strokeStyle='#ffd23f';x.lineWidth=2;x.beginPath();x.moveTo(cx,base+2);x.lineTo(cx,base-16);x.stroke()}
+function showDial(){document.body.classList.add('zooming');$('zdial').classList.add('show');$('zdv').textContent=zfmt(zoomLv)+'×';drawDial();clearTimeout(dialT)}
+function hideDialSoon(){clearTimeout(dialT);dialT=setTimeout(()=>{$('zdial').classList.remove('show');document.body.classList.remove('zooming')},1100)}
+function liveZoom(z){zoomLv=Math.max(ZMIN(),Math.min(ZMAX,z));if(zoomLv>=1&&!onUltra){if(caps.zoom&&caps.zoom.max>=zoomLv){track.applyConstraints({advanced:[{zoom:Math.max(caps.zoom.min,zoomLv)}]}).catch(()=>{});dz=1}else dz=zoomLv;applyDigital()}renderZoom();showDial()}
+$('zoom').addEventListener('pointerdown',e=>{zDrag={x:e.clientX,z:zoomLv,moved:false,btn:e.target.closest('button')};$('zoom').setPointerCapture(e.pointerId)});
+$('zoom').addEventListener('pointermove',e=>{if(!zDrag)return;const dx=e.clientX-zDrag.x;if(!zDrag.moved&&Math.abs(dx)<6)return;zDrag.moved=true;liveZoom(zDrag.z*Math.exp(-dx/ZK))});
+$('zoom').addEventListener('pointerup',e=>{if(!zDrag)return;const d=zDrag;zDrag=null;if(d.moved){setZoom(zoomLv,true);hideDialSoon()}else if(d.btn){setZoom(+d.btn.dataset.z,true);showDial();hideDialSoon()}});
+$('zoom').addEventListener('pointercancel',()=>{zDrag=null;hideDialSoon()});
 async function setZoom(z,quiet){z=Math.max(.5,Math.min(8,z));const hw=caps.zoom;
  try{if(z<1){if(hw&&hw.min<=z){await track.applyConstraints({advanced:[{zoom:z}]});dz=1}else if(lens.ultra&&!onUltra){onUltra=true;await start(lens.ultra.deviceId);dz=1}else if(!lens.ultra&&!(hw&&hw.min<1))z=1}
   else{if(onUltra){onUltra=false;await start();}if(hw&&hw.max>=1){const h=Math.min(z,hw.max);await track.applyConstraints({advanced:[{zoom:Math.max(hw.min,h)}]});dz=z/Math.max(hw.min,h)}else dz=z}}catch(e){dz=Math.max(1,z)}
- zoomLv=z;applyDigital();renderZoom();if(!quiet){const t=$('zoomToast');t.textContent=(z<1?'0.5':z%1?z.toFixed(1):z)+'×';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}}
+ zoomLv=z;applyDigital();renderZoom();if(!quiet){showDial();hideDialSoon()}}
 // pinch to zoom like the native camera
 let pinch0=null;stage.addEventListener('touchstart',e=>{if(e.touches.length===2){const[a,b]=e.touches;pinch0={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),z:zoomLv};tx0=null}},{passive:true});
-stage.addEventListener('touchmove',e=>{if(pinch0&&e.touches.length===2){const[a,b]=e.touches;const z=pinch0.z*Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)/pinch0.d;zoomLv=Math.max(1,Math.min(8,z));if(!onUltra&&caps.zoom&&caps.zoom.max>=zoomLv){track.applyConstraints({advanced:[{zoom:zoomLv}]}).catch(()=>{});dz=1}else dz=zoomLv;applyDigital();renderZoom()}},{passive:true});
-stage.addEventListener('touchend',e=>{if(e.touches.length<2&&pinch0){pinch0=null;setZoom(zoomLv,true)}},{passive:true});
+stage.addEventListener('touchmove',e=>{if(pinch0&&e.touches.length===2){const[a,b]=e.touches;const z=pinch0.z*Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)/pinch0.d;liveZoom(Math.max(1,z))}},{passive:true});
+stage.addEventListener('touchend',e=>{if(e.touches.length<2&&pinch0){pinch0=null;setZoom(zoomLv,true);hideDialSoon()}},{passive:true});
 // exposure compensation + torch, only when the phone exposes them
 function setupCtl(){const ec=caps.exposureCompensation;$('expBtn').classList.toggle('hidden',!ec);if(ec){const s=$('expSl');s.min=ec.min;s.max=ec.max;s.step=ec.step||.1;s.value=0}
  $('torch').classList.toggle('hidden',!caps.torch)}

@@ -589,8 +589,9 @@ const wc=document.createElement('canvas');
 function applyDigital(){vid.style.transform=`${facing==='user'?'scaleX(-1) ':''}scale(${dz})`}
 async function findLenses(){try{const d=(await navigator.mediaDevices.enumerateDevices()).filter(x=>x.kind==='videoinput');
  lens.ultra=d.find(x=>/ultra|超廣角/i.test(x.label))||null;lens.wide=d.find(x=>/back|後/i.test(x.label)&&!/ultra|tele|超廣角|望遠/i.test(x.label)&&!/dual|triple|雙|三/i.test(x.label))||null}catch(e){}}
-function zoomOpts(){const o=[];const hw=caps.zoom;if(facing==='environment'&&((hw&&hw.min<1)||lens.ultra))o.push(.5);o.push(1,2,3);return o}
-function renderZoom(){const o=zoomOpts();$('zoom').innerHTML=o.map(z=>`<button data-z="${z}" class="${Math.abs(z-zoomLv)<.05||(z===o[o.length-1]&&zoomLv>z)||(z<zoomLv&&o[o.indexOf(z)+1]>zoomLv&&false)?'on':''}">${Math.abs(z-zoomLv)<.05?(zoomLv<1?'.5':zoomLv%1?zoomLv.toFixed(1):zoomLv)+'×':(z<1?'.5':z)}</button>`).join('');
+function zoomOpts(){const o=[];const hw=caps.zoom;if(facing==='environment'&&((hw&&hw.min<1)||lens.ultra))o.push(.5);o.push(1,1.5,2,3);return o}
+function renderZoom(){const o=zoomOpts(),near=o.reduce((a,b)=>Math.abs(b-zoomLv)<Math.abs(a-zoomLv)?b:a),f=z=>(z<1?'.5':(Math.round(z*10)/10).toString());
+ $('zoom').innerHTML=o.map(z=>`<button data-z="${z}" class="${z===near?'on':''}">${z===near?f(zoomLv)+'×':f(z)}</button>`).join('');
  $('zoom').querySelectorAll('button').forEach(b=>b.onclick=()=>setZoom(+b.dataset.z))}
 async function setZoom(z,quiet){z=Math.max(.5,Math.min(8,z));const hw=caps.zoom;
  try{if(z<1){if(hw&&hw.min<=z){await track.applyConstraints({advanced:[{zoom:z}]});dz=1}else if(lens.ultra&&!onUltra){onUltra=true;await start(lens.ultra.deviceId);dz=1}else if(!lens.ultra&&!(hw&&hw.min<1))z=1}
@@ -797,15 +798,15 @@ const ILL={
  vanish:SV(SKY('#c9dcf0','#eef4fb')+'<rect y="170" width="300" height="230" fill="#8b7e6c"/><path d="M150 170 60 400M150 170 240 400" stroke="#444" stroke-width="6"/><g stroke="#5b4a3a" stroke-width="5">'+[0,1,2,3,4,5,6,7].map(i=>{const t=(i/7)**1.6,y=170+230*t,w=12+130*t;return`<path d="M${150-w} ${y}h${2*w}"/>`}).join('')+'</g>'),
 };
 const COMP=[
- {id:'thirds',n:'三分法（九宮格）',tag:'人像',mode:'portrait',img:'02-portrait-2',ov:'thirds',ghost:{x:'third',top:.26,foot:.95},
+ {id:'thirds',zoom:2,n:'三分法（九宮格）',tag:'人像',mode:'portrait',img:'02-portrait-2',ov:'thirds',ghost:{x:'third',top:.26,foot:.95},
   why:'九宮格就是三分法：畫面切成 3×3，把主角的頭放在上方的三分線上，身體站在左或右的直線上，比置中更有變化。',steps:['手機在主角胸口高度','用 2x 變焦，站 4 公尺以外','頭放在上方的三分線上','身體站在左或右的直線上']},
- {id:'center',n:'置中構圖',tag:'人像',mode:'portrait',img:'01-portrait-1',ov:'center',ghost:{x:.5,top:.42,foot:.86},
+ {id:'center',zoom:1.5,n:'置中構圖',tag:'人像',mode:'portrait',img:'01-portrait-1',ov:'center',ghost:{x:.5,top:.42,foot:.86},
   why:'主角站在畫面正中央，四周保留環境，看起來穩定又有自信，適合拍完整的穿搭。',steps:['手機在主角胸口高度','用 1.5x 變焦，比例最自然','站在 4 公尺以外','主角的頭對準畫面中心']},
  {id:'legs',n:'網美長腿',tag:'人像',mode:'portrait',svg:'legs',ov:'thirds',ghost:{x:.5,top:.13,foot:.94},
   why:'「腳貼地、天留空」：手機放低往上拍，腳尖貼近畫面底部，腿會顯得特別長，是 IG 最常見的全身拍法。',steps:['手機放到腰部或膝蓋高度','鏡頭微微往上仰','腳尖貼近畫面底部（不要切到）','頭頂上方留一點天空']},
- {id:'tele',n:'半身特寫',tag:'人像',mode:'portrait',img:'03-close-up',ov:'thirds',ghost:{half:true,x:.5,eyeY:.33},
+ {id:'tele',zoom:3,n:'半身特寫',tag:'人像',mode:'portrait',img:'03-close-up',ov:'thirds',ghost:{half:true,x:.5,eyeY:.33},
   why:'退遠一點再放大，背景會被壓縮得乾淨，臉也不會變形，有雜誌感。',steps:['退到 4 公尺以外','用 3x 變焦','眼睛放在上方三分線','底邊切在腰或大腿中段，不要切在關節']},
- {id:'env',n:'環境人像',tag:'人像',mode:'portrait',img:'04-side-chick',ov:'thirds',ghost:{x:'side',top:.3,foot:.86},
+ {id:'env',zoom:3,n:'環境人像',tag:'人像',mode:'portrait',img:'04-side-chick',ov:'thirds',ghost:{x:'side',top:.3,foot:.86},
   why:'主角站在畫面一側，另一側留給場景（咖啡廳、門口、街道），照片在說「他在哪裡」。',steps:['退到 8 公尺以外，用 3–4x','主角放在左或右側','頭靠近上方三分線','另一側留給場景']},
  {id:'golden',n:'黃金比例',tag:'人像',mode:'portrait',svg:'golden',ov:'phi',ghost:{x:'phi',top:.32,foot:.94},
   why:'比三分法更貼近黃金比例 0.618：主角的頭放在螺旋的中心點，視線會自然沿著螺旋走向主角。',steps:['主角站在 0.382 或 0.618 的直線上','頭放在螺旋的中心點','螺旋展開的那一側放天空或空間']},
@@ -817,11 +818,11 @@ const COMP=[
   why:'用門框、窗戶、拱門、樹枝當作畫面裡的第二個框，把焦點鎖在主角身上，很有層次。',steps:['找門、窗、拱門或樹枝','主角站在框的正中間','框的邊緣放在畫面外圍','對焦在主角身上']},
  {id:'diag',n:'對角線',tag:'人像',mode:'portrait',svg:'diag',ov:'diag',ghost:{x:'third',top:.3,foot:.9},
   why:'讓主要線條（樓梯、坡道、身體的斜線）沿著對角線走，畫面會有動感。',steps:['找斜的線條（樓梯、坡、牆）','讓線條從一個角延伸到另一個角','主角站在對角線上的三分點']},
- {id:'travel',n:'小人物大風景',tag:'風景',mode:'portrait',img:'05-travel-shot',ov:'thirds',ghost:{x:.5,top:.7,foot:.9},
+ {id:'travel',zoom:2,n:'小人物大風景',tag:'風景',mode:'portrait',img:'05-travel-shot',ov:'thirds',ghost:{x:.5,top:.7,foot:.9},
   why:'經典旅遊照：人很小、站在底部中間，地標和風景佔滿上方，主角是「這個地方」。',steps:['背對太陽，順光拍','站高一點，往下約 15°','距離 5–10 公尺，用 2–3x','主角小小的放在底部中間']},
- {id:'onethird',n:'地平線在下 1/3',tag:'風景',mode:'landscape',img:'06-one-third',ov:'thirds',land:{hy:.7},
+ {id:'onethird',zoom:1.5,n:'地平線在下 1/3',tag:'風景',mode:'landscape',img:'06-one-third',ov:'thirds',land:{hy:.7},
   why:'天空佔三分之二，景物（橋、建築、地平線）壓在下方三分之一，畫面通透、很 IG。這是從範例照片量出來的位置：約在 70%。',steps:['天空好看的時候用','手機平舉在眼睛高度','用 1.5x 變焦','地平線放在下方三分線附近']},
- {id:'twothird',n:'主體佔 2/3',tag:'風景',mode:'landscape',img:'07-two-third',ov:'thirds',land:{hy:.75,sx:.5},
+ {id:'twothird',zoom:1.5,n:'主體佔 2/3',tag:'風景',mode:'landscape',img:'07-two-third',ov:'thirds',land:{hy:.75,sx:.5},
   why:'高高的主體（塔、樹、建築）往上佔滿畫面的三分之二，下方留一條地面平衡。範例照片量到地平線約在 75%。',steps:['手機平舉在眼睛高度','用 1.5x，站 3 公尺以外','主體從地面一路延伸到上方','地平線壓低在約 3/4 的位置']},
  {id:'sym',n:'對稱構圖',tag:'風景',mode:'landscape',svg:'sym',ov:'sym',land:{hy:.5,sym:true},
   why:'湖面倒影、建築正面：讓畫面左右或上下對稱，是唯一適合把地平線放正中間的構圖。',steps:['找有倒影的水面或對稱的建築','地平線（水面）放在正中間','手機一定要拿水平']},
@@ -934,7 +935,8 @@ $('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';onUltr
 let fpsOn=false;try{fpsOn=localStorage.getItem('fc_fps')==='1'}catch(e){}$('fpsOn').checked=fpsOn;$('fps').classList.toggle('show',fpsOn);
 $('fpsOn').onchange=e=>{fpsOn=e.target.checked;$('fps').classList.toggle('show',fpsOn);try{localStorage.setItem('fc_fps',fpsOn?'1':'0')}catch(err){}};
 let fN=0,fT=0;(function fl(t){requestAnimationFrame(fl);if(!fpsOn)return;fN++;if(!fT)fT=t;if(t-fT>=500){$('fps').textContent=`${Math.round(fN*1000/(t-fT))} fps · AI ${detMs.toFixed(0)} ms`;fN=0;fT=t}})(0);
-const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;renderSteps('')};
+const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;renderSteps('');const C=id&&COMPBY[id];
+ if(C&&C.zoom&&stream&&facing==='environment'){setZoom(C.zoom);const t=$('poseToast');t.textContent=`已切到建議焦段 ${C.zoom}×（可隨時用右側按鈕或兩指縮放更改）`;t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
 updTray();renderSteps('');
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>

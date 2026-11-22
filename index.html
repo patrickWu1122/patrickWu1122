@@ -118,6 +118,9 @@ h3{font-size:15px;margin:10px 0 8px}
 .crow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:6px 14px}.crow button{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#ddd;font:600 14px -apple-system,sans-serif;border-radius:10px;padding:10px 14px;cursor:pointer;min-width:56px}.crow button.on{border-color:var(--y);color:var(--y)}
 .etabs{flex:none;display:flex;justify-content:center;gap:26px;padding:8px 0 10px}.etab{appearance:none;border:0;background:none;color:var(--dim);font:600 14px -apple-system,sans-serif;padding:8px 2px;cursor:pointer}.etab.on{color:var(--y)}
 #lv{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none}
+.comps{flex:none;display:none;gap:8px;overflow-x:auto;padding:8px 14px 2px;scrollbar-width:none;scroll-snap-type:x proximity}.comps::-webkit-scrollbar{display:none}.comps.show{display:flex}.comps.show~.poses{display:none}
+.comps button{flex:none;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.08);border-radius:12px;padding:4px 4px 3px;color:#ddd;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;scroll-snap-align:center;transition:transform .2s var(--ease),border-color .2s}
+.comps button:active{transform:scale(.94)}.comps button.on{border-color:var(--y)}.comps button.on span{color:var(--y)}.comps canvas{width:36px;height:48px;border-radius:6px;background:#2a2a2e}.comps span{font-size:11px;white-space:nowrap}
 .looks{flex:none;display:none;flex-direction:column;padding:6px 0 0}.looks.show{display:flex}.looks.show~.poses{display:none}
 .lrow{display:flex;gap:8px;overflow-x:auto;padding:4px 14px;scrollbar-width:none}.lrow::-webkit-scrollbar{display:none}
 .lrow button{flex:none;appearance:none;border:1.5px solid transparent;background:rgba(255,255,255,.08);color:#ddd;font:600 13px -apple-system,sans-serif;border-radius:16px;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px}
@@ -144,7 +147,7 @@ h3{font-size:15px;margin:10px 0 8px}
   <button class="ic" id="more" aria-label="詳細建議與設定"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
   <div id="status">載入 AI 偵測中…</div>
   <div id="recTime">00:00</div>
-  <div class="tr"><div id="lvl"></div><button class="ic" id="lookBtn" aria-label="濾鏡"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></svg></button><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
+  <div class="tr"><div id="lvl"></div><button class="ic" id="compBtn" aria-label="構圖"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-dasharray="2.5 2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></button><button class="ic" id="lookBtn" aria-label="濾鏡"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="10" r="5"/><circle cx="15" cy="10" r="5"/><circle cx="12" cy="15" r="5"/></svg></button><button class="ic hidden" id="torch" aria-label="補光燈"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></button><button class="ic hidden" id="expBtn" aria-label="曝光"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button></div>
  </div>
  <div class="vfwrap"><div class="vf" id="stage">
   <video id="vid" playsinline muted autoplay></video>
@@ -158,6 +161,7 @@ h3{font-size:15px;margin:10px 0 8px}
   <div id="cover"><div><b>按下方快門開始取景</b><p id="coverMsg">第一次會詢問相機與水平儀權限，請按「允許」</p></div></div>
  </div></div>
  <div class="guide"><div id="pill"><b></b><small></small></div></div>
+ <div class="comps" id="comps"></div>
  <div class="looks" id="looks"><div class="lrow" id="lookRow"></div><div class="arow" id="lookAmtRow"><span class="ap">強度</span><input type="range" id="lookAmt" min="0" max="100" value="100"><b id="lookAmtV">100</b></div></div>
  <div class="poses" id="poses"></div>
  <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div>
@@ -476,7 +480,9 @@ function renderTips(items,minor){if(!$('sheet').classList.contains('open'))retur
 /* ---------- 60fps overlay drawing ---------- */
 let rT=0,KF=1;const K=b=>1-Math.pow(1-b,KF);
 function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-rT)/1000):1/60;rT=now;KF=dt*60;drawLive();if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
- if(comp&&COMPBY[comp]){const C=COMPBY[comp];drawCompOv(c,W,H,C.ov,'rgba(255,255,255,.4)',C.land&&C.land.hy)}else if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
+ if(comp&&COMPBY[comp]){const C=COMPBY[comp];drawCompOv(c,W,H,C.ov,'rgba(255,255,255,.85)',C.land&&C.land.hy,true);
+   // dashed target: where the main subject goes for this method
+   if(mode==='landscape'&&C.land){const tx=C.land.sx!=null?C.land.sx:(state.g&&state.g.sal&&state.g.sal.x>.5?2/3:1/3),ty=C.ov==='lead'?C.land.hy:(C.land.hy||.6)-.12;c.save();c.setLineDash([5,5]);c.strokeStyle=$('shutter').classList.contains('ready')?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2;c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=3;c.beginPath();c.arc(tx*W,ty*H,Math.min(W,H)*.07,0,7);c.stroke();c.font='600 12px -apple-system,sans-serif';c.fillStyle='rgba(255,255,255,.95)';c.setLineDash([]);c.fillText('主體放這裡',tx*W-30,ty*H-Math.min(W,H)*.07-6);c.restore()}}else if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
  const ready=$('shutter').classList.contains('ready');
  if(mode==='portrait'&&state.ghost){const g=state.ghost;
   // ghost silhouette (where to stand + which pose)
@@ -490,7 +496,7 @@ function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-
   const hr=g.s*H*.27;c.beginPath();c.arc(G[0].x,G[0].y-hr*.15,hr,0,7);c.fill();c.stroke();
   // limbs: thick translucent capsule + outline, green when matched
   LIMBS.forEach(([,a,b],i)=>{c.strokeStyle=col(SM.limbs[i])+'.28)';c.lineWidth=lw;c.beginPath();c.moveTo(G[a].x,G[a].y);c.lineTo(G[b].x,G[b].y);c.stroke();
-   c.strokeStyle=col(SM.limbs[i])+'.9)';c.lineWidth=2.5;c.beginPath();c.moveTo(G[a].x,G[a].y);c.lineTo(G[b].x,G[b].y);c.stroke()});
+   c.strokeStyle=col(SM.limbs[i])+'.95)';c.lineWidth=2.5;c.setLineDash(SM.limbs[i]>.5||ready?[]:[6,5]);c.beginPath();c.moveTo(G[a].x,G[a].y);c.lineTo(G[b].x,G[b].y);c.stroke();c.setLineDash([])});
   // feet marker: the exact spot to stand
   if(!g.half){const fy=Math.max(G[11].y,G[12].y)+6;c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.setLineDash([6,5]);c.beginPath();c.ellipse((G[11].x+G[12].x)/2,fy,g.s*H*.55,g.s*H*.12,0,0,7);c.stroke();c.setLineDash([])}
   // the real person's skeleton (smoothed)
@@ -807,7 +813,7 @@ const COMPBY=Object.fromEntries(COMP.map(c=>[c.id,c]));
 let comp=null;try{comp=localStorage.getItem('fc_comp')||null;if(comp&&!COMPBY[comp])comp=null}catch(e){}
 
 /* overlay lines for each method (live viewfinder + previews) */
-function drawCompOv(c,W,H,ov,col='rgba(255,255,255,.55)',tgt){c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=1.2;c.beginPath();
+function drawCompOv(c,W,H,ov,col='rgba(255,255,255,.55)',tgt,dash){c.save();c.strokeStyle=col;c.fillStyle=col;c.lineWidth=dash?1.6:1.2;if(dash){c.setLineDash([7,6]);c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=3}c.beginPath();
  const L=(x1,y1,x2,y2)=>{c.moveTo(x1,y1);c.lineTo(x2,y2)};
  if(ov==='thirds'){for(const p of P3){L(W*p,0,W*p,H);L(0,H*p,W,H*p)}c.stroke();for(const a of P3)for(const b of P3){c.beginPath();c.arc(W*a,H*b,3,0,7);c.fill()}}
  else if(ov==='center'){L(W/2,0,W/2,H);L(0,H/2,W,H/2);c.stroke();c.beginPath();c.arc(W/2,H/2,Math.min(W,H)*.06,0,7);c.stroke()}
@@ -829,7 +835,7 @@ ghostPlace=function(lm,shot,personX){const C=comp&&COMPBY[comp];if(!C||!C.ghost|
 /* landscape targets by method */
 const _guideLand=guideLand;
 guideLand=function(s,live){const C=comp&&COMPBY[comp];if(!C||!C.land)return _guideLand(s,live);const base=learned(),lm={...base,n:3,low:C.land.hy,high:C.land.hy,pLow:1,sx:C.land.sx!=null?(C.land.sx===.5?.5:C.land.sx):base.sx,sym:!!C.land.sym};
- const a=adviseLand(s,lm,tilt);let list=a.list;if(lm.sym)list=list.filter(i=>i.k!=='mid');if(C.land.sx===.5){list=list.filter(i=>i.k!=='sub');if(Math.abs(s.sx-.5)>.12)list.push({k:'sub',who:'cam',act:s.sx>.5?'鏡頭往右移一點':'鏡頭往左移一點',why:'這個構圖要把主體放在畫面中線上',p:50})}
+ const a=adviseLand(s,lm,tilt);let list=a.list;if(s.hy==null&&!lm.sym)list.push({k:'nohz',who:'cam',act:'找不到地平線：對準有天空和地面的畫面',why:'這個構圖要靠地平線或天際線來對齊',p:46});else if(s.hy==null)list.push({k:'nohz',who:'cam',act:'找不到水平線：對準水面或建築的中線',why:'對稱構圖要對齊中間那條線',p:46});if(lm.sym)list=list.filter(i=>i.k!=='mid');if(C.land.sx===.5){list=list.filter(i=>i.k!=='sub');if(Math.abs(s.sx-.5)>.12)list.push({k:'sub',who:'cam',act:s.sx>.5?'鏡頭往右移一點':'鏡頭往左移一點',why:'這個構圖要把主體放在畫面中線上',p:50})}
  list.sort((x,y)=>y.p-x.p);list=stable(list,live);const ready=!list.some(i=>i.p>=45);return{list,ready,msg:ready?'✓ 可以拍了':list[0].act.split('：')[0],target:{hy:C.land.hy},sal:{x:s.sx,y:s.sy},hy:s.hy,ang:s.ang}};
 
 /* ---------- 構圖法 tab: cards + detail view ---------- */
@@ -852,7 +858,19 @@ function setComp(id){comp=id;try{id?localStorage.setItem('fc_comp',id):localStor
 $('compChip').onclick=()=>setComp(null);
 setComp(comp);
 
-renderComps();
+function buildCompStrip(){const list=[{id:null,n:'一般'}].concat(COMP.filter(C=>C.mode===mode||(mode==='portrait'&&C.tag==='人像')||(mode==='landscape'&&C.tag==='風景'&&C.mode==='landscape')));
+ $('comps').innerHTML=list.map(C=>`<button data-c="${C.id||''}" class="${(C.id||null)===comp?'on':''}"><canvas width="72" height="96"></canvas><span>${C.n.replace('（九宮格）','')}</span></button>`).join('');
+ $('comps').querySelectorAll('button').forEach((b,i)=>{const C=list[i],x=b.querySelector('canvas').getContext('2d');x.scale(2,2);if(C.id)drawCompOv(x,36,48,C.ov,'rgba(255,210,63,.95)',C.land&&C.land.hy,true);else{x.strokeStyle='rgba(255,255,255,.5)';x.setLineDash([3,3]);x.beginPath();for(const p of P3){x.moveTo(36*p,0);x.lineTo(36*p,48);x.moveTo(0,48*p);x.lineTo(36,48*p)}x.stroke()}
+  b.onclick=()=>{setComp(C.id);if(C.id){const t=$('poseToast');t.textContent=C.n+'：'+C.steps.slice(0,2).join('、');t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}buildCompStrip();b.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}});
+ $('compBtn').classList.toggle('on',!!comp)}
+$('compBtn').onclick=()=>{const open=!$('comps').classList.contains('show');$('comps').classList.toggle('show',open);if(open){$('looks').classList.remove('show');buildCompStrip()}};
+$('lookBtn').addEventListener('click',()=>{if($('looks').classList.contains('show'))$('comps').classList.remove('show')});
+// keep strip in sync with mode switches and the library tab
+const _setComp=setComp;setComp=function(id){_setComp(id);if($('comps').classList.contains('show'))buildCompStrip();$('compBtn').classList.toggle('on',!!id)};
+const _sum=setUIMode;setUIMode=function(m){_sum(m);const C=comp&&COMPBY[comp];if(C&&((m==='landscape')!==(C.mode==='landscape')))setComp(null);if($('comps').classList.contains('show'))buildCompStrip()};
+document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
+$('compChip').onclick=()=>setComp(null);
+renderComps();buildCompStrip();
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>

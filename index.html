@@ -159,6 +159,30 @@ body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity 
 #fps{position:absolute;left:10px;bottom:10px;z-index:2;background:rgba(0,0,0,.6);color:#fff;font:600 11px ui-monospace,Menlo,monospace;border-radius:6px;padding:3px 6px;display:none;pointer-events:none}#fps.show{display:block}
 .ic.rt{width:auto;min-width:40px;padding:0 8px;border-radius:18px;font:700 12px -apple-system,sans-serif;color:#fff}
 .vf{flex:none;width:auto;max-height:none;aspect-ratio:auto;transition:width .3s var(--ease),height .3s var(--ease)}
+/* ===== full-bleed layout (native camera style) ===== */
+#app{position:relative;display:block;height:100dvh;padding:0;overflow:hidden;background:#000}
+.vfwrap{position:absolute;inset:0;display:block}.vf{position:absolute!important;left:0;top:0;transition:none}
+.top{position:absolute;left:0;right:0;top:env(safe-area-inset-top);height:50px;z-index:5;padding:0 12px}
+.top .ic,.top .aib:not(.on){background:rgba(0,0,0,.38);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.guide{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 54px);height:auto;z-index:4;pointer-events:none;padding:0 14px;gap:6px}
+#pill{background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-radius:14px;padding:6px 14px;max-width:94%}
+#pill b{font-size:16px}#pill small{font-size:12px;margin-top:1px}#steps2{pointer-events:auto;max-width:100%}#steps2 span{background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.bar{position:absolute;left:0;right:0;bottom:0;height:calc(86px + env(safe-area-inset-bottom));padding:0 20px env(safe-area-inset-bottom);background:#000;display:grid;grid-template-columns:56px 1fr 56px;align-items:center;z-index:5}
+.bar #thumb{width:46px;height:46px;justify-self:start;border-radius:8px}.bar #flip{justify-self:end;width:52px;height:52px}.bar #flip svg{width:24px;height:24px}
+.modes{justify-self:center;height:50px;background:rgba(255,255,255,.12);border-radius:25px;padding:4px;overflow:visible;position:relative}
+#modesTrack{position:relative!important;left:auto!important;display:flex;gap:0;transform:none!important}
+.modes button{position:relative;z-index:1;height:42px;padding:0 17px;border-radius:21px;font:600 16px -apple-system,sans-serif;letter-spacing:.6px;color:#fff;opacity:1}
+.modes button.on{color:var(--y)}#mInd{position:absolute;top:0;left:0;height:42px;width:0;border-radius:21px;background:rgba(0,0,0,.6);transition:left .35s var(--ease),width .35s var(--ease)}
+.shot{position:absolute;left:0;right:0;bottom:calc(98px + env(safe-area-inset-bottom));height:84px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 26px;z-index:5;pointer-events:none}
+.shot>*{pointer-events:auto}#shutter{width:80px;height:80px}#shutter i{width:64px;height:64px}
+.ic.po{justify-self:end;width:52px;height:52px;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}.ic.po svg{width:22px;height:22px}.ic.po.on{background:var(--y)}.ic.po.on svg{fill:#000}
+#zoom{position:absolute;left:50%;bottom:calc(192px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:5}
+#zoom button{width:38px;height:38px;font-size:13px;background:rgba(0,0,0,.45)}#zoom button.on{font-size:14px}
+#zdial{bottom:calc(184px + env(safe-area-inset-bottom));z-index:5}
+.tray{position:absolute;left:0;right:0;bottom:calc(240px + env(safe-area-inset-bottom));height:92px;z-index:4;pointer-events:none}.tray>.show{pointer-events:auto}
+.tray .poses button,.tray .comps button,.tray .lrow button{background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.looks .arow{background:rgba(0,0,0,.45);border-radius:14px;margin:4px 14px 0;padding:2px 14px}
+#cover{z-index:3}
 .hidden{display:none!important}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
@@ -181,7 +205,6 @@ body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity 
   <div id="count"></div>
   <div id="autoRing"></div>
   <button id="compChip"><span></span><i>✕</i></button>
-  <div id="zoom"></div><div id="zdial"><canvas id="zdc"></canvas><b id="zdv">1×</b></div>
   <div id="expRow"><span>曝光</span><input type="range" id="expSl" min="-2" max="2" step=".1" value="0"><b id="expV">0.0</b></div>
   <div id="poseToast"></div>
   <div id="cover"><div><b>按下方快門開始取景</b><p id="coverMsg">第一次會詢問相機權限，請按「允許」</p></div></div>
@@ -191,12 +214,9 @@ body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity 
  <div class="looks" id="looks"><div class="lrow" id="lookRow"></div><div class="arow" id="lookAmtRow"><span class="ap">強度</span><input type="range" id="lookAmt" min="0" max="100" value="100"><b id="lookAmtV">100</b></div></div>
  <div class="poses" id="poses"></div>
  </div>
- <div class="modes"><div id="modesTrack"><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div>
- <div class="ctrl">
-  <button id="thumb" aria-label="看剛拍的照片"></button>
-  <button id="shutter" aria-label="拍照"><i></i></button>
-  <div class="rgt"><button class="ic" id="flip" aria-label="切換前後鏡頭"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></svg></button></div>
- </div>
+ <div id="zoom"></div><div id="zdial"><canvas id="zdc"></canvas><b id="zdv">1×</b></div>
+ <div class="shot"><span></span><button id="shutter" aria-label="拍照"><i></i></button><button class="ic po" id="poseBtn" aria-label="姿勢"><svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="4.5" r="2.3"/><path d="M8.6 8h6.8l1.1 6.2-1.6.4-.9-3.6v11h-2.2l-.6-6-.6 6H8.4V11l-.9 3.6-1.6-.4z"/></svg></button></div>
+ <div class="bar"><button id="thumb" aria-label="看剛拍的照片"></button><div class="modes"><div id="modesTrack"><i id="mInd"></i><button data-m="landscape">風景</button><button data-m="portrait" class="on">人像</button><button data-m="video">錄影</button></div></div><button class="ic" id="flip" aria-label="切換前後鏡頭"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></svg></button></div>
  <p id="note" class="hidden"></p>
 </div>
 
@@ -758,7 +778,7 @@ $('eSave').onclick=()=>{const c=E.crop,k=Math.min(1,4096/Math.max(c.w,c.h));draw
 addEventListener('resize',()=>{if($('editor').classList.contains('show'))paint()});
 
 /* =================== modes: 風景 · 人像 · 錄影 =================== */
-function centerModes(){const m=capMode==='video'?'video':mode,on=document.querySelector(`.modes button[data-m="${m}"]`),tr=$('modesTrack');if(!on)return;const cx=tr.parentElement.clientWidth/2,bx=on.offsetLeft+on.offsetWidth/2;tr.style.transform=`translateX(${Math.round(cx-bx)}px)`}
+function centerModes(){centerModes2()}
 addEventListener('resize',centerModes);document.fonts&&document.fonts.ready.then(centerModes);
 const baseSetMode=setUIMode;
 setUIMode=function(m){const was=capMode;capMode=m==='video'?'video':'photo';baseSetMode(m==='video'?'portrait':m);
@@ -779,7 +799,7 @@ if(lgl){const c=(t,src)=>{const o=lgl.createShader(t);lgl.shaderSource(o,src);lg
  lgl.uniform1i(LU.img,0);lgl.uniform1f(LU.blur,0);lgl.uniform1f(LU.hasMask,0)}
 const lookParams=()=>{const b=lookP(look.id),o={};for(const[k]of ADJ)o[k]=b[k]*look.amt;return o};
 let lvW=0,lvH=0;
-function drawLive(){const on=(look.id!=='none'||(capMode==='video'&&ratioKey!=='34'))&&running&&lgl&&vid.readyState>=2;lvC.style.opacity=on?1:0;vid.style.opacity=on?0:1;if(!on)return;
+function drawLive(){const on=(look.id!=='none'||(capMode==='video'&&(ratioKey||'34')!=='34'))&&running&&lgl&&vid.readyState>=2;lvC.style.opacity=on?1:0;vid.style.opacity=on?0:1;if(!on)return;
  const r=stage.getBoundingClientRect(),dpr=Math.min(2,devicePixelRatio||1),w=Math.round(r.width*dpr),h=Math.round(r.height*dpr);if(w!==lvW||h!==lvH){lvC.width=lvW=w;lvC.height=lvH=h;lgl.viewport(0,0,w,h)}
  lgl.bindTexture(lgl.TEXTURE_2D,ltex);lgl.texImage2D(lgl.TEXTURE_2D,0,lgl.RGB,lgl.RGB,lgl.UNSIGNED_BYTE,vid);
  // emulate object-fit:cover + digital zoom + selfie mirror in texture space
@@ -805,7 +825,7 @@ $('shutter').onclick=async()=>{if(!stream){start();return}if(!vid.videoWidth)ret
  const lk=look.id!=='none'?{...look}:null;const b=lk?await renderLook(c,lookParams()):await new Promise(r=>c.toBlob(r,'image/jpeg',.95));
  addShot({type:'photo',blob:b,url:URL.createObjectURL(b),canvas:c,subject:sub,look:lk})};
 // record the filtered picture when a look is on
-const _startRec=startRec;startRec=function(){if((look.id!=='none'||ratioKey!=='34')&&lvC.captureStream){const s0=stream;stream=new MediaStream([...lvC.captureStream(30).getVideoTracks(),...s0.getAudioTracks()]);try{_startRec()}finally{stream=s0}}else _startRec()};
+const _startRec=startRec;startRec=function(){if((look.id!=='none'||(ratioKey||'34')!=='34')&&lvC.captureStream){const s0=stream;stream=new MediaStream([...lvC.captureStream(30).getVideoTracks(),...s0.getAudioTracks()]);try{_startRec()}finally{stream=s0}}else _startRec()};
 
 /* =================== composition library (構圖法) =================== */
 // person silhouette for illustrations
@@ -954,7 +974,7 @@ const _detectTick=detectTick;detectTick=function(){if(!aiOn||mode==='landscape')
 const _tb=$('timerBtn').onclick;$('timerBtn').onclick=()=>{_tb();if(!aiOn&&tmode==='auto'){tmode='off';try{localStorage.setItem('fc_timer','off')}catch(e){}renderTimer();const t=$('poseToast');t.textContent='自動快門需要開啟 AI 輔助';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
 applyAI(false);
 /* =================== smoothness: tray, freeze-frame transitions, FPS meter =================== */
-function updTray(){const c=$('comps').classList.contains('show'),l=$('looks').classList.contains('show');$('poses').classList.toggle('show',!c&&!l&&mode==='portrait')}
+function updTray(){updTray2()}
 ['compBtn','lookBtn','aiBtn'].forEach(id=>$(id).addEventListener('click',()=>requestAnimationFrame(updTray)));
 const _sum2=setUIMode;setUIMode=function(m){_sum2(m);updTray();staticPill()};document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
 // camera restarts (lens, flip, video mode) fade from a blurred still of the last frame, like the native camera
@@ -969,12 +989,20 @@ const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;re
  if(C&&C.zoom&&stream&&facing==='environment'){setZoom(C.zoom);const t=$('poseToast');t.textContent=`已切到建議焦段 ${C.zoom}×（可用下方倍率按鈕或兩指縮放更改）`;t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
 updTray();renderSteps('');staticPill();
 /* =================== shooting ratio (3:4 · 4:5 · 1:1 · 9:16) =================== */
-const RAT=[['34',3/4,'3:4'],['45',4/5,'4:5'],['11',1,'1:1'],['916',9/16,'9:16']];let ratioKey='34';try{ratioKey=localStorage.getItem('fc_ratio')||'34';if(!RAT.find(r=>r[0]===ratioKey))ratioKey='34'}catch(e){}
-function sizeVF(){const box=document.querySelector('.vfwrap').getBoundingClientRect(),ar=RAT.find(r=>r[0]===ratioKey)[1];let w=box.width,h=w/ar;if(h>box.height){h=box.height;w=h*ar}
- stage.style.width=Math.round(w)+'px';stage.style.height=Math.round(h)+'px';AR=w/h;$('ratioBtn').textContent=RAT.find(r=>r[0]===ratioKey)[2];setTimeout(()=>{if(stream)sizeOv();SM.ghost=null},320)}
+var RAT=[['34',3/4,'3:4'],['45',4/5,'4:5'],['11',1,'1:1'],['916',9/16,'9:16']];var ratioKey;ratioKey='34';try{ratioKey=localStorage.getItem('fc_ratio')||'34';if(!RAT.find(r=>r[0]===ratioKey))ratioKey='34'}catch(e){}
+function sizeVF(){sizeVF2()}
 $('ratioBtn').onclick=()=>{const i=RAT.findIndex(r=>r[0]===ratioKey);ratioKey=RAT[(i+1)%RAT.length][0];try{localStorage.setItem('fc_ratio',ratioKey)}catch(e){}sizeVF();
  const t=$('poseToast');t.textContent='拍攝比例 '+RAT.find(r=>r[0]===ratioKey)[2]+({'45':'（IG 貼文）','916':'（限動／短影音）','11':'（方形）','34':'（iPhone 預設）'}[ratioKey]);t.classList.remove('show');void t.offsetWidth;t.classList.add('show')};
 addEventListener('resize',sizeVF);new ResizeObserver(sizeVF).observe(document.querySelector('.vfwrap'));sizeVF();
+/* =================== full-bleed sizing + mode capsule + pose button =================== */
+function safeTop(){return document.querySelector('.top').getBoundingClientRect().top}
+function sizeVF2(){if(!RAT||!ratioKey)return;const W=innerWidth,H=innerHeight,top=safeTop(),barH=document.querySelector('.bar').getBoundingClientRect().height,ar=RAT.find(r=>r[0]===ratioKey)[1];
+ const avail=H-top-barH;let w=W,h=W/ar,y=top;if(h<=avail)y=top+Math.max(0,(avail-h)*.35);else if(h>H-top){h=H-top;w=h*ar}
+ Object.assign(stage.style,{width:Math.round(w)+'px',height:Math.round(h)+'px',left:Math.round((W-w)/2)+'px',top:Math.round(y)+'px'});AR=w/h;$('ratioBtn').textContent=RAT.find(r=>r[0]===ratioKey)[2];requestAnimationFrame(()=>{if(stream)sizeOv();SM.ghost=null})}
+function centerModes2(){if(typeof capMode==='undefined')return;const m=capMode==='video'?'video':mode,on=document.querySelector(`.modes button[data-m="${m}"]`),ind=$('mInd');if(!on)return;ind.style.left=on.offsetLeft+'px';ind.style.width=on.offsetWidth+'px'}
+var poseOpen=false;$('poseBtn').onclick=()=>{poseOpen=!poseOpen;if(poseOpen){$('comps').classList.remove('show');$('looks').classList.remove('show')}updTray()};
+function updTray2(){if(typeof poseOpen==='undefined')return;const c=$('comps').classList.contains('show'),l=$('looks').classList.contains('show');if(c||l)poseOpen=false;$('poses').classList.toggle('show',poseOpen&&mode==='portrait');$('poseBtn').classList.toggle('on',poseOpen&&mode==='portrait');$('poseBtn').style.visibility=mode==='portrait'?'visible':'hidden'}
+sizeVF();centerModes();updTray();
 </script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
 </body>

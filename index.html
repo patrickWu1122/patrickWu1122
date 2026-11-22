@@ -151,7 +151,7 @@ body.zooming #zoom{opacity:0}#zoom{transition:opacity .2s}
 .aib{appearance:none;border:0;height:32px;padding:0 11px 0 9px;border-radius:16px;background:rgba(255,255,255,.12);color:#fff;font:700 13px -apple-system,sans-serif;display:flex;align-items:center;gap:6px;cursor:pointer;transition:background .25s,color .25s,transform .2s var(--ease)}
 .aib:active{transform:scale(.92)}.aib i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .25s}
 .aib.on{background:var(--y);color:#000}.aib.on i{background:#000}
-body.noai .poses{visibility:hidden;opacity:0}body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity .25s,max-height .3s var(--ease)}body.noai #pill{opacity:.55!important}
+body.noai #chip,body.noai #status{opacity:0!important}.poses{transition:opacity .25s,max-height .3s var(--ease)}
 .tray{position:relative;flex:none;height:92px}
 .tray>.comps,.tray>.looks,.tray>.poses{position:absolute;left:0;right:0;top:0;display:flex!important;max-height:none!important;opacity:0!important;visibility:hidden!important;transform:translateY(10px);transition:opacity .26s var(--ease),transform .32s var(--ease),visibility 0s .32s;will-change:transform,opacity}
 .tray>.show{opacity:1!important;visibility:visible!important;transform:none;transition:opacity .26s var(--ease),transform .32s var(--ease),visibility 0s}
@@ -426,7 +426,7 @@ const LIMBS=[['armL',1,3],['armL',3,5],['armR',2,4],['armR',4,6],['legL',7,9],['
 const ARMNAME={armL:'手',armR:'手',legL:'腳',legR:'腳'};
 
 /* ---------- ghost placement (where the subject should stand) ---------- */
-function ghostPlace(lm,shot,personX){const P=POSES[poseId];const half=recipe==='tele'||(recipe==='auto'&&(shot==='half'||shot==='close'));
+function ghostPlace(lm,shot,personX){personX=null;const P=POSES[poseId];const half=recipe==='tele';
  let tx=.5;if(lm.off>=.2)tx=personX!=null&&personX>.5?.5+lm.off:.5-lm.off;else if(recipe==='thirds')tx=personX!=null&&personX>.5?2/3:1/3;
  if(half){const s=(1.05-lm.eyeY)/1.55;return{s,ox:tx,oy:1.05,half:true,P}}
  const top={legs:.13,center:.2,thirds:.24,env:.3,auto:.14}[recipe]||.14,foot=recipe==='env'?.9:lm.footY;const s=(foot-top)/3.68;return{s,ox:tx,oy:top+1.78*s,half:false,P}}
@@ -487,7 +487,7 @@ function detectTick(){if(!running)return;const now=performance.now();if(!busy&&v
  try{const mirror=facing==='user';
   if(mode==='portrait'){const r=detectPeople(detSource(),false),g=guidePortrait(r,true),lm=learned();lastShot=g.shot||lastShot;
    let per=personPts(r.kp,mirror);if(per){perSeen=Math.min(perSeen+1,6);perHold={per,t:performance.now()}}else perSeen=Math.max(perSeen-1,0);
-   if(perSeen<3)per=null;else if(!per&&perHold&&performance.now()-perHold.t<600)per=perHold.per;const px=per&&per.pts[1]&&per.pts[2]?(per.pts[1].x+per.pts[2].x)/2:null;const gh=ghostPlace(lm,lastShot,px),m=matchPose(per,gh,mirror);state={g,m,ghost:gh,per};updateGuide()}
+   if(perSeen<3)per=null;else if(!per&&perHold&&performance.now()-perHold.t<600)per=perHold.per;const px=per&&per.pts[1]&&per.pts[2]?(per.pts[1].x+per.pts[2].x)/2:null;const gh=ghostPlace(lm,'full',null),m=matchPose(per,gh,mirror);state={g,m,ghost:gh,per};updateGuide()}
   else{const s=hzFilter(detectScene(detSource())),g=guideLand(s,true);state={g,m:null,ghost:null,per:null};updateGuide()}}catch(e){console.log(e)}detMs=detMs*.8+(performance.now()-_t0)*.2;busy=false}
  if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,40)}
 
@@ -520,12 +520,12 @@ let rT=0,KF=1;const K=b=>1-Math.pow(1-b,KF);
 function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-rT)/1000):1/60;rT=now;KF=dt*60;drawLive();if(!running||!OW)return;const c=oc;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,OW,OH);const W=OW,H=OH;
  if(comp&&COMPBY[comp]){const C=COMPBY[comp];drawCompOv(c,W,H,C.ov,'rgba(255,255,255,.85)',C.land&&C.land.hy,true);
    // dashed target: where the main subject goes for this method
-   if(mode==='landscape'&&C.land){const tx=C.land.sx!=null?C.land.sx:(state.g&&state.g.sal&&state.g.sal.x>.5?2/3:1/3),ty=C.ov==='lead'?C.land.hy:(C.land.hy||.6)-.12;c.save();c.setLineDash([5,5]);c.strokeStyle=$('shutter').classList.contains('ready')?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2;c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=3;c.beginPath();c.arc(tx*W,ty*H,Math.min(W,H)*.07,0,7);c.stroke();c.font='600 12px -apple-system,sans-serif';c.fillStyle='rgba(255,255,255,.95)';c.setLineDash([]);c.fillText('主體放這裡',tx*W-30,ty*H-Math.min(W,H)*.07-6);c.restore()}}else if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
+   if(mode==='landscape'&&C.land){const tx=C.land.sx!=null?C.land.sx:1/3,ty=C.ov==='lead'?C.land.hy:(C.land.hy||.6)-.12;c.save();c.setLineDash([5,5]);c.strokeStyle=$('shutter').classList.contains('ready')?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2;c.shadowColor='rgba(0,0,0,.5)';c.shadowBlur=3;c.beginPath();c.arc(tx*W,ty*H,Math.min(W,H)*.07,0,7);c.stroke();c.font='600 12px -apple-system,sans-serif';c.fillStyle='rgba(255,255,255,.95)';c.setLineDash([]);c.fillText('主體放這裡',tx*W-30,ty*H-Math.min(W,H)*.07-6);c.restore()}}else if(showGrid){c.strokeStyle='rgba(255,255,255,.22)';c.lineWidth=1;c.beginPath();for(const p of P3){c.moveTo(W*p,0);c.lineTo(W*p,H);c.moveTo(0,H*p);c.lineTo(W,H*p)}c.stroke()}
  const ready=$('shutter').classList.contains('ready');
- if(aiOn&&mode==='portrait'&&state.ghost){const g=state.ghost;
+ if(mode==='portrait'){const g=ghostPlace(learned(),'full',null);
   // ghost silhouette (where to stand + which pose)
   const T=g.P.p.map(p=>gpt(g,p));if(!SM.ghost)SM.ghost=T;SM.ghost=SM.ghost.map((p,i)=>({x:lerp(p.x,T[i].x,K(.15)),y:lerp(p.y,T[i].y,K(.15))}));const G=SM.ghost.map(p=>({x:p.x*W,y:p.y*H})),lw=Math.max(10,g.s*H*.2);
-  const m=state.m;LIMBS.forEach((l,i)=>{SM.limbs[i]=lerp(SM.limbs[i],m&&m.limbs[i]?1:0,K(.15))});
+  const m=aiOn?state.m:null;LIMBS.forEach((l,i)=>{SM.limbs[i]=lerp(SM.limbs[i],m&&m.limbs[i]?1:0,K(.15))});
   c.lineCap='round';c.lineJoin='round';
   const col=(k)=>{const t=ready?1:k;return`rgba(${Math.round(255-181*t)},${Math.round(255-33*t)},${Math.round(255-127*t)},`};
   // torso
@@ -538,13 +538,11 @@ function render(now){requestAnimationFrame(render);const dt=rT?Math.min(.1,(now-
   // feet marker: the exact spot to stand
   if(!g.half){const fy=Math.max(G[11].y,G[12].y)+6;c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.setLineDash([6,5]);c.beginPath();c.ellipse((G[11].x+G[12].x)/2,fy,g.s*H*.55,g.s*H*.12,0,0,7);c.stroke();c.setLineDash([])}
   // the real person's skeleton (smoothed)
-  smoothPts(state.per&&state.per.pts);if(SM.pts){const S=SM.pts;c.strokeStyle='rgba(255,210,63,.95)';c.lineWidth=3;c.beginPath();
+  smoothPts(aiOn&&state.per&&state.per.pts);if(SM.pts){const S=SM.pts;c.strokeStyle='rgba(255,210,63,.95)';c.lineWidth=3;c.beginPath();
    for(const[a,b]of[[1,2],[1,7],[2,8],[7,8],[1,3],[3,5],[2,4],[4,6],[7,9],[9,11],[8,10],[10,12]])if(S[a]&&S[b]){c.moveTo(S[a].x*W,S[a].y*H);c.lineTo(S[b].x*W,S[b].y*H)}c.stroke();
    c.fillStyle='#ffd23f';for(const p of S)if(p){c.beginPath();c.arc(p.x*W,p.y*H,3.5,0,7);c.fill()}}}
- if(aiOn&&mode==='landscape'&&state.g){const g=state.g;if(g.hy!=null&&g.target){SM.hz=SM.hz==null?g.hy:lerp(SM.hz,g.hy,K(.08));SM.ha=SM.ha==null?(g.ang||0):lerp(SM.ha,g.ang||0,K(.08));const a=Math.tan((SM.ha||0)/57.3)*W/2;
-   c.strokeStyle=ready?'#4ade80':'rgba(255,210,63,.95)';c.lineWidth=2.5;c.beginPath();c.moveTo(0,SM.hz*H-a);c.lineTo(W,SM.hz*H+a);c.stroke();
-   c.setLineDash([8,6]);c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2;c.beginPath();c.moveTo(0,g.target.hy*H);c.lineTo(W,g.target.hy*H);c.stroke();c.setLineDash([]);
-   c.font='600 13px -apple-system,"Noto Sans TC"';c.fillStyle='rgba(255,255,255,.9)';c.fillText('地平線放這裡',10,g.target.hy*H-8)}}
+ if(mode==='landscape'){const C=comp&&COMPBY[comp],hy=C&&C.land&&C.land.hy!=null?C.land.hy:2/3;c.save();c.setLineDash([10,7]);c.strokeStyle='rgba(74,222,128,.95)';c.lineWidth=2;c.shadowColor='rgba(0,0,0,.55)';c.shadowBlur=3;c.beginPath();c.moveTo(0,hy*H);c.lineTo(W,hy*H);c.stroke();
+   c.setLineDash([]);c.font='600 13px -apple-system,"Noto Sans TC"';c.fillStyle='rgba(255,255,255,.95)';c.fillText('地平線對齊這條線',10,hy*H-8);c.restore()}
  }
 requestAnimationFrame(render);
 
@@ -882,7 +880,7 @@ function drawCompOv(c,W,H,ov,col='rgba(255,255,255,.55)',tgt,dash){c.save();c.st
 
 /* ghost placement by method (overrides the generic recipe) */
 const _ghostPlace=ghostPlace;
-ghostPlace=function(lm,shot,personX){const C=comp&&COMPBY[comp];if(!C||!C.ghost||mode!=='portrait')return _ghostPlace(lm,shot,personX);const g=C.ghost,P=POSES[poseId],side=personX!=null&&personX>.5;
+ghostPlace=function(lm,shot,personX){personX=null;const C=comp&&COMPBY[comp];if(!C||!C.ghost||mode!=='portrait')return _ghostPlace(lm,shot,personX);const g=C.ghost,P=POSES[poseId],side=personX!=null&&personX>.5;
  const tx=g.x==='third'?(side?2/3:1/3):g.x==='side'?(side?.72:.28):g.x==='phi'?(side?.618:.382):g.x==='edge'?(side?.8:.2):g.x;
  if(g.half){const s=(1.05-g.eyeY)/1.55;return{s,ox:tx,oy:1.05,half:true,P}}const s=(g.foot-g.top)/3.68;return{s,ox:tx,oy:g.top+1.78*s,half:false,P}};
 /* landscape targets by method */
@@ -940,22 +938,25 @@ setInterval(()=>{if(tmode!=='auto'||!running||capMode==='video'||counting)return
  if(ready&&now>autoCool){if(!readySince){readySince=now;const r=$('autoRing');r.classList.remove('go');void r.offsetWidth;r.classList.add('go')}else if(now-readySince>1000){readySince=0;autoCool=now+4000;burst()}}else if(!ready){readySince=0;$('autoRing').classList.remove('go')}},100);
 /* =================== AI assist on/off =================== */
 let aiOn=true;try{aiOn=localStorage.getItem('fc_ai')!=='0'}catch(e){}
+function staticPill(){if(mode==='portrait'&&aiOn)return;const C=comp&&COMPBY[comp],el=$('pill');let b,sm;
+ if(mode==='landscape'){b='把地平線對齊綠色虛線';sm=C&&C.land&&C.land.sx!=null?'主體放在黃色虛線圈':'主體放在三分線的交點附近'}else{b='讓主角站進白色人形';sm='腳踩黃色虛線圈，姿勢照著人形擺'}
+ pillText=b;el.querySelector('b').textContent=b;el.querySelector('small').textContent=sm;el.classList.remove('ok');$('shutter').classList.remove('ready');renderSteps.h=null;renderSteps('')}
 function applyAI(toast){$('aiBtn').classList.toggle('on',aiOn);document.body.classList.toggle('noai',!aiOn);
  if(!aiOn){state={g:null,m:null,ghost:null,per:null};SM.pts=null;SM.ghost=null;$('shutter').classList.remove('ready');pillText='';
-  const el=$('pill');el.querySelector('b').textContent='AI 輔助已關閉';el.querySelector('small').textContent='一般相機模式：構圖線、濾鏡、縮放、計時照常可用';el.classList.remove('ok');el.classList.add('in');$('chip').classList.remove('show');
+  staticPill();
   if(tmode==='auto'){tmode='off';try{localStorage.setItem('fc_timer','off')}catch(e){}renderTimer()}}
  else{pillText='';lastDet=0}
- if(toast){const t=$('poseToast');t.textContent=aiOn?'AI 輔助已開啟：站位、姿勢與構圖建議':'AI 輔助已關閉：變成一般相機，也比較省電';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}}
+ if(toast){const t=$('poseToast');t.textContent=aiOn?'AI 姿勢比對已開啟：會比對主角的站位與姿勢':'AI 姿勢比對已關閉：只顯示固定參考人形，比較省電';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}}
 $('aiBtn').onclick=()=>{aiOn=!aiOn;try{localStorage.setItem('fc_ai',aiOn?'1':'0')}catch(e){}applyAI(true)};
 // no detection, guidance or ghost while AI is off (saves battery)
-const _detectTick=detectTick;detectTick=function(){if(!aiOn){if(running){if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,120)}return}_detectTick()};
+const _detectTick=detectTick;detectTick=function(){if(!aiOn||mode==='landscape'){if(running){if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(detectTick);else setTimeout(detectTick,120)}return}_detectTick()};
 // auto shutter needs AI
 const _tb=$('timerBtn').onclick;$('timerBtn').onclick=()=>{_tb();if(!aiOn&&tmode==='auto'){tmode='off';try{localStorage.setItem('fc_timer','off')}catch(e){}renderTimer();const t=$('poseToast');t.textContent='自動快門需要開啟 AI 輔助';t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
 applyAI(false);
 /* =================== smoothness: tray, freeze-frame transitions, FPS meter =================== */
-function updTray(){const c=$('comps').classList.contains('show'),l=$('looks').classList.contains('show');$('poses').classList.toggle('show',!c&&!l&&mode==='portrait'&&aiOn)}
+function updTray(){const c=$('comps').classList.contains('show'),l=$('looks').classList.contains('show');$('poses').classList.toggle('show',!c&&!l&&mode==='portrait')}
 ['compBtn','lookBtn','aiBtn'].forEach(id=>$(id).addEventListener('click',()=>requestAnimationFrame(updTray)));
-const _sum2=setUIMode;setUIMode=function(m){_sum2(m);updTray()};document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
+const _sum2=setUIMode;setUIMode=function(m){_sum2(m);updTray();staticPill()};document.querySelectorAll('.modes button').forEach(b=>b.onclick=()=>setUIMode(b.dataset.m));
 // camera restarts (lens, flip, video mode) fade from a blurred still of the last frame, like the native camera
 const fz=$('freeze');const _start2=start;start=async function(id){if(stream&&vid.videoWidth){fz.width=Math.round(vid.videoWidth/4);fz.height=Math.round(vid.videoHeight/4);fz.getContext('2d').drawImage(vid,0,0,fz.width,fz.height);fz.style.transform=vid.classList.contains('mirror')?'scaleX(-1)':'';fz.classList.add('on')}
  await _start2(id);const off=()=>setTimeout(()=>fz.classList.remove('on'),60);if(vid.requestVideoFrameCallback)vid.requestVideoFrameCallback(off);else off()};
@@ -964,9 +965,9 @@ $('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';onUltr
 let fpsOn=false;try{fpsOn=localStorage.getItem('fc_fps')==='1'}catch(e){}$('fpsOn').checked=fpsOn;$('fps').classList.toggle('show',fpsOn);
 $('fpsOn').onchange=e=>{fpsOn=e.target.checked;$('fps').classList.toggle('show',fpsOn);try{localStorage.setItem('fc_fps',fpsOn?'1':'0')}catch(err){}};
 let fN=0,fT=0;(function fl(t){requestAnimationFrame(fl);if(!fpsOn)return;fN++;if(!fT)fT=t;if(t-fT>=500){$('fps').textContent=`${Math.round(fN*1000/(t-fT))} fps · AI ${detMs.toFixed(0)} ms`;fN=0;fT=t}})(0);
-const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;renderSteps('');const C=id&&COMPBY[id];
- if(C&&C.zoom&&stream&&facing==='environment'){setZoom(C.zoom);const t=$('poseToast');t.textContent=`已切到建議焦段 ${C.zoom}×（可隨時用右側按鈕或兩指縮放更改）`;t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
-updTray();renderSteps('');
+const _setComp2=setComp;setComp=function(id){_setComp2(id);renderSteps.h=null;renderSteps('');staticPill();const C=id&&COMPBY[id];
+ if(C&&C.zoom&&stream&&facing==='environment'){setZoom(C.zoom);const t=$('poseToast');t.textContent=`已切到建議焦段 ${C.zoom}×（可用下方倍率按鈕或兩指縮放更改）`;t.classList.remove('show');void t.offsetWidth;t.classList.add('show')}};
+updTray();renderSteps('');staticPill();
 /* =================== shooting ratio (3:4 · 4:5 · 1:1 · 9:16) =================== */
 const RAT=[['34',3/4,'3:4'],['45',4/5,'4:5'],['11',1,'1:1'],['916',9/16,'9:16']];let ratioKey='34';try{ratioKey=localStorage.getItem('fc_ratio')||'34';if(!RAT.find(r=>r[0]===ratioKey))ratioKey='34'}catch(e){}
 function sizeVF(){const box=document.querySelector('.vfwrap').getBoundingClientRect(),ar=RAT.find(r=>r[0]===ratioKey)[1];let w=box.width,h=w/ar;if(h>box.height){h=box.height;w=h*ar}
